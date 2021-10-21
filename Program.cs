@@ -10,7 +10,7 @@ namespace TimetableGenerator
         {
             var exams = ReadFile("ear-f-83.stu");
 
-            Population population = new Population(popSize: 100, length: exams.Count, maxTimeSlot: 24, examIDs: new List<int>(exams.Keys));
+            Population population = new Population(popSize: 100, length: exams.Count, maxTimeSlot: 24, exams: exams);
 
             int generation = 0;
             bool run = true;
