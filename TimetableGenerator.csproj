@@ -9,4 +9,10 @@
     <Folder Include="GA\Genetic Operators\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\Toronto\ear-f-83.stu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

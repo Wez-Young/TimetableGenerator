@@ -3,14 +3,14 @@
     public class Gene
     {
         //Properties
-        private int _Slot { get; }
+        public int Event { get; }
 
         //Constructors
         public Gene() { }
 
-        public Gene(int slot)
+        public Gene(int examEvent)
         {
-            _Slot = slot;
+            Event = examEvent;
         }
     }
 }
