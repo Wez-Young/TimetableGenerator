@@ -8,17 +8,22 @@ namespace TimetableGenerator
     {
         static void Main(string[] args)
         {
+            int popSize = 40;
             var exams = ReadFile("ear-f-83.stu");
 
-            Population population = new Population(popSize: 100, length: exams.Count, maxTimeSlot: 24, exams: exams);
+            Population population = new Population(popSize: popSize, length: exams.Count, maxTimeSlot: 24, exams: exams);
 
-            int generation = 0;
             bool run = true;
             while(run)
             {
-                Console.WriteLine(++generation);
-                if (generation == 100)
+                if (population.Chromosomes.Count == popSize)
+                {
+                    population.Chromosomes.ForEach(chromosome => { Console.Write("\n");
+                    chromosome.Genes.ForEach(gene => Console.Write($"{gene.Event}, "));
+                    });
+
                     run = false;
+                }
             }
         }
 
@@ -48,7 +53,7 @@ namespace TimetableGenerator
                         studentList = exams[examKey];
                     else
                     {
-                        //Create a new student list if exam ID does not exit in exams list
+                        //Create a new student list if exam ID does not exist in exams list
                         //and adds both new exam ID and new List to the Dictionary
                         studentList = new List<int>();
                         exams.Add(examKey, studentList);

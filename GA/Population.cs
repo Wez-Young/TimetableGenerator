@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TimetableGenerator.GA
 {
@@ -26,9 +28,24 @@ namespace TimetableGenerator.GA
             //Creates population equal to populationSize
             for(int i = 0; i < populationSize; i++)
             {
-                //Adds new chromsome to population
-                Chromosomes.Add(new Chromosome(length, maxTimeSlot, exams));
+                var newChromosome = new Chromosome(length, maxTimeSlot, exams);
+
+                if (!CheckPermutationExists(newChromosome))
+                {
+                    Chromosomes.Add(newChromosome);//Adds new chromsome to population if permutation does not already exist
+                    continue;
+                }
+
+                --i;//Retry making chromosome            
             }
+        }
+
+        private bool CheckPermutationExists(Chromosome chromosome)//Checks if new permutation already exists
+        {
+            if (Chromosomes.Any(ch => ch == chromosome))
+                return true;
+
+            return false;
         }
     }
 }

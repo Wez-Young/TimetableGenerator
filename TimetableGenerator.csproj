@@ -6,7 +6,118 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Data\Toronto\" />
     <Folder Include="GA\Genetic Operators\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Data\Toronto\car-f-92.crs" />
+    <Resource Include="Data\Toronto\car-f-92.stu" />
+    <Resource Include="Data\Toronto\car-s-91.crs" />
+    <Resource Include="Data\Toronto\car-s-91.stu" />
+    <Resource Include="Data\Toronto\ear-f-83.crs" />
+    <Resource Include="Data\Toronto\ear-f-83.stu" />
+    <Resource Include="Data\Toronto\hec-s-92.crs" />
+    <Resource Include="Data\Toronto\hec-s-92.stu" />
+    <Resource Include="Data\Toronto\kfu-s-93.crs" />
+    <Resource Include="Data\Toronto\kfu-s-93.stu" />
+    <Resource Include="Data\Toronto\lse-f-91.crs" />
+    <Resource Include="Data\Toronto\lse-f-91.stu" />
+    <Resource Include="Data\Toronto\pur-s-93.crs" />
+    <Resource Include="Data\Toronto\pur-s-93.stu" />
+    <Resource Include="Data\Toronto\rye-s-93.crs" />
+    <Resource Include="Data\Toronto\rye-s-93.stu" />
+    <Resource Include="Data\Toronto\sta-f-83.crs" />
+    <Resource Include="Data\Toronto\sta-f-83.stu" />
+    <Resource Include="Data\Toronto\tre-s-92.crs" />
+    <Resource Include="Data\Toronto\tre-s-92.stu" />
+    <Resource Include="Data\Toronto\uta-s-92.crs" />
+    <Resource Include="Data\Toronto\uta-s-92.stu" />
+    <Resource Include="Data\Toronto\ute-s-92.crs" />
+    <Resource Include="Data\Toronto\ute-s-92.stu" />
+    <Resource Include="Data\Toronto\yor-f-83.crs" />
+    <Resource Include="Data\Toronto\yor-f-83.stu" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\Toronto\car-f-92.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\car-f-92.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\car-s-91.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\car-s-91.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\ear-f-83.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\ear-f-83.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\hec-s-92.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\hec-s-92.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\kfu-s-93.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\kfu-s-93.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\lse-f-91.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\lse-f-91.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\pur-s-93.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\pur-s-93.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\rye-s-93.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\rye-s-93.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\sta-f-83.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\sta-f-83.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\tre-s-92.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\tre-s-92.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\uta-s-92.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\uta-s-92.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\ute-s-92.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\ute-s-92.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\yor-f-83.crs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Toronto\yor-f-83.stu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
