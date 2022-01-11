@@ -6,15 +6,13 @@ namespace TimetableGenerator.GA
     {
         //Properties
         public int Event { get; }
-        public List<int> Students { get; }
 
         //Constructors
         public Gene() { }
 
-        public Gene(int examEvent, List<int> students)
+        public Gene(int examEvent)
         {
             Event = examEvent;
-            Students = students;
         }
     }
 }

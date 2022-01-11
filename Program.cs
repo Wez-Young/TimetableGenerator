@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TimetableGenerator.GA;
+
 namespace TimetableGenerator
 {
     class Program
@@ -11,19 +12,13 @@ namespace TimetableGenerator
             int popSize = 40;
             var exams = ReadFile("ear-f-83.stu");
 
-            Population population = new Population(popSize: popSize, length: exams.Count, maxTimeSlot: 24, exams: exams);
+            Population population = new Population(popSize, exams.Count, 24, exams);
 
             bool run = true;
             while(run)
             {
-                if (population.Chromosomes.Count == popSize)
-                {
-                    population.Chromosomes.ForEach(chromosome => { Console.Write("\n");
-                    chromosome.Genes.ForEach(gene => Console.Write($"{gene.Event}, "));
-                    });
-
-                    run = false;
-                }
+                Chromosome p1 = SelectParent(population);
+                Chromosome p2 = SelectParent(population);
             }
         }
 
@@ -66,6 +61,24 @@ namespace TimetableGenerator
             }
 
             return exams;
+        }
+
+        private static Chromosome SelectParent(Population pop)
+        {
+            Chromosome winner = new Chromosome(pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)]);
+
+            for(int i = 0; i < Settings.tournamentSize; ++i)
+            {
+                Chromosome candidate = new Chromosome(pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)]);
+
+                while(winner.Equals(candidate))
+                    candidate = new Chromosome(pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)]);
+
+                if (candidate.Fitness < winner.Fitness)
+                    winner = candidate;
+            }
+
+            return winner;
         }
     }
 }

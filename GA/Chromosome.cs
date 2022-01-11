@@ -10,20 +10,25 @@ namespace TimetableGenerator.GA
         //Properties
         public List<Gene> Genes { get; }
         public List<int> Timeslots { get; }
-        public Dictionary<int, int> ExamSizes { get; }
+        public double Fitness { get; set; }
 
         //Constructors
         public Chromosome() {}
+
+        public Chromosome(Chromosome ch)//Make a copy of the chromosome
+        {
+            Genes = new List<Gene>(ch.Genes);
+            Timeslots = new List<int>(ch.Timeslots);
+            Fitness = ch.Fitness;
+        }
         
         public Chromosome(int length, int maxTimeslot, Dictionary<int, List<int>> exams)
         {
             Genes = new List<Gene>();
             Timeslots = new List<int>();
-            ExamSizes = new Dictionary<int, int>();
 
-            GenerateChromosome(length, maxTimeslot, exams);
+            GenerateChromosome(length, exams);
             GenerateTimeslot(maxTimeslot);
-            InitialiseExamSizes();
         }
         
         //Methods
@@ -31,21 +36,13 @@ namespace TimetableGenerator.GA
         {
             while(Timeslots.Count < maxTimeslot)
             {
-                int timeslot = Settings.rand.Next(maxTimeslot);
+                int timeslot = Settings.rand.Next(1, maxTimeslot + 1);
                 if (!Timeslots.Contains(timeslot))
                     Timeslots.Add(timeslot);
             }
         }
 
-        private void InitialiseExamSizes()
-        {
-            for (int i = 1; i <= Genes.Count; i++)
-            {
-                ExamSizes.Add(Genes[i-1].Event, Genes[i-1].Students.Count);
-            }
-        }
-
-        private void GenerateChromosome(int length, int maxTimeSlot, Dictionary<int, List<int>> exams)
+        private void GenerateChromosome(int length, Dictionary<int, List<int>> exams)
         {
             var examIDs = new List<int>(exams.Keys);
             //Adds x amount of genes based on specified length
@@ -54,7 +51,7 @@ namespace TimetableGenerator.GA
                 //Gets random index
                 int index = Settings.rand.Next(examIDs.Count);
                 //Assigns the value associated to the index to the gene
-                Gene gene = new Gene(examEvent: examIDs[index], students: exams[examIDs[index]]);
+                Gene gene = new Gene(examEvent: examIDs[index]);
                 Genes.Add(gene);
                 //Removes the item from list to avoid duplicates
                 examIDs.Remove(gene.Event);
