@@ -47,5 +47,15 @@ namespace TimetableGenerator.GA
 
             return false;
         }
+
+        public double WorstFitness()
+        {
+            return Chromosomes.OrderByDescending(ch => ch.Fitness).First().Fitness;
+        }
+
+        public double BestFitness()
+        {
+            return Chromosomes.OrderBy(ch => ch.Fitness).First().Fitness;
+        }
     }
 }

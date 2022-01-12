@@ -10,6 +10,7 @@ namespace TimetableGenerator.GA
         //Properties
         public List<Gene> Genes { get; }
         public List<int> Timeslots { get; }
+        public List<int> ReserveTimeslots { get; }
         public double Fitness { get; set; }
 
         //Constructors
@@ -19,6 +20,7 @@ namespace TimetableGenerator.GA
         {
             Genes = new List<Gene>(ch.Genes);
             Timeslots = new List<int>(ch.Timeslots);
+            ReserveTimeslots = new List<int>(ch.ReserveTimeslots);
             Fitness = ch.Fitness;
         }
         
@@ -26,19 +28,20 @@ namespace TimetableGenerator.GA
         {
             Genes = new List<Gene>();
             Timeslots = new List<int>();
+            ReserveTimeslots = new List<int>();
 
             GenerateChromosome(length, exams);
-            GenerateTimeslot(maxTimeslot);
+            GenerateTimeslot(Timeslots, maxTimeslot);
+            GenerateTimeslot(ReserveTimeslots, maxTimeslot);
         }
         
         //Methods
-        private void GenerateTimeslot(int maxTimeslot)
+        private void GenerateTimeslot(List <int> timeslots, int maxTimeslot)
         {
-            while(Timeslots.Count < maxTimeslot)
+            while(timeslots.Count < Genes.Count)
             {
                 int timeslot = Settings.rand.Next(1, maxTimeslot + 1);
-                if (!Timeslots.Contains(timeslot))
-                    Timeslots.Add(timeslot);
+                timeslots.Add(timeslot);
             }
         }
 
