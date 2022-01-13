@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TimetableGenerator.GA;
+using TimetableGenerator.GA.Genetic_Operators;
 
 namespace TimetableGenerator
 {
@@ -10,15 +11,9 @@ namespace TimetableGenerator
     {
         private static Dictionary<int, List<int>> students = new();
 
-        /* TODO
-         * Create global variable that store the exam IDs and their student lists
-         * Implement a fitness function, ensure it doesn't place duplicates
-         * 
-         */
-
         static void Main()
         {
-            int popSize = 40;
+            int popSize = 100, gen = 0;
             students = new(new SortedDictionary<int, List<int>>(ReadFile("ear-f-83.stu")));
 
             int[,] conflictMatrix = new int[students.Count, students.Count];
@@ -29,11 +24,22 @@ namespace TimetableGenerator
             bool run = true;
             while (run)
             {
-                Console.WriteLine($"Best Fitness: {population.BestFitness()}");
-                Console.WriteLine($"Worst Fitness: {population.WorstFitness()}");
+                gen++;
+                Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().Fitness} Worst Fitness: {population.WorstFitness().Fitness}");
+
                 Chromosome p1 = SelectParent(population);
                 Chromosome p2 = SelectParent(population);
+                Chromosome child = CrossoverOperators.PartiallyMapped(p1, p2);
+
+                child.Fitness = CheckFitness(conflictMatrix, child);
+                population = SurvivalSelection(population, child);
+                //Implement genetic operators
+                if (gen == 200)
+                    run = false;
             }
+
+            Console.WriteLine($"Best Fitness: {population.BestFitness().Fitness}");
+            Console.WriteLine($"Total No. unplaced exams: {population.BestFitness().Fitness * students.Count}");
         }
 
         //Reads in and sorts the data from a file  
@@ -84,6 +90,7 @@ namespace TimetableGenerator
                 foreach (var nextExam in students)//Check against every other exam
                     matrix[firstExam.Key - 1, nextExam.Key - 1] = CheckConflicts(firstExam, nextExam);//Add the number of conflicts to the matrix
         }
+
         //Check the number of conflicts between two exams
         private static int CheckConflicts(KeyValuePair<int, List<int>> firstExam, KeyValuePair<int, List<int>> nextExam)
         {
@@ -97,6 +104,7 @@ namespace TimetableGenerator
 
             return conflicts;
         }
+
         //Select a parent for reproducing
         private static Chromosome SelectParent(Population pop)
         {
@@ -195,6 +203,7 @@ namespace TimetableGenerator
             fitness = Math.Round((double)(ch.Genes.Count - Timetable.Values.Sum(list => list.Count)) / ch.Genes.Count , 4);
             return fitness;
         }
+
         //Attempt to assign exam to its reserve timeslot
         private static void AssignBackup(Dictionary<int, List<int>> timetable, int[,] conflictMatrix, Chromosome ch, int examID)
         {
@@ -249,6 +258,20 @@ namespace TimetableGenerator
                         break;
                 }
             }
+        }
+
+        private static Population SurvivalSelection(Population pop, Chromosome child)
+        {
+
+            Chromosome competitor = pop.WorstFitness();
+
+            if(competitor.Fitness > child.Fitness)
+            {
+                pop.Chromosomes.Remove(competitor);
+                pop.Chromosomes.Add(child);
+            }
+
+            return pop;
         }
     }
 }

@@ -48,14 +48,14 @@ namespace TimetableGenerator.GA
             return false;
         }
 
-        public double WorstFitness()
+        public Chromosome WorstFitness()
         {
-            return Chromosomes.OrderByDescending(ch => ch.Fitness).First().Fitness;
+            return Chromosomes.OrderByDescending(ch => ch.Fitness).First();
         }
 
-        public double BestFitness()
+        public Chromosome BestFitness()
         {
-            return Chromosomes.OrderBy(ch => ch.Fitness).First().Fitness;
+            return Chromosomes.OrderBy(ch => ch.Fitness).First();
         }
     }
 }

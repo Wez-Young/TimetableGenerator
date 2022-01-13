@@ -8,9 +8,9 @@ namespace TimetableGenerator.GA
     public class Chromosome
     {
         //Properties
-        public List<Gene> Genes { get; }
-        public List<int> Timeslots { get; }
-        public List<int> ReserveTimeslots { get; }
+        public List<Gene> Genes { get; set; }
+        public List<int> Timeslots { get; set; }
+        public List<int> ReserveTimeslots { get; set; }
         public double Fitness { get; set; }
 
         //Constructors
