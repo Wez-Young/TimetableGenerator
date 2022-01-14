@@ -27,14 +27,17 @@ namespace TimetableGenerator
                 gen++;
                 Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().Fitness} Worst Fitness: {population.WorstFitness().Fitness}");
 
-                Chromosome p1 = SelectParent(population);
-                Chromosome p2 = SelectParent(population);
-                Chromosome child = CrossoverOperators.PartiallyMapped(p1, p2);
+                for (int i = 0; i < students.Count / 10; i++)
+                {
+                    Chromosome p1 = SelectParent(population);
+                    Chromosome p2 = SelectParent(population);
+                    Chromosome child = CrossoverOperators.PartiallyMapped(p1, p2);
 
-                child.Fitness = CheckFitness(conflictMatrix, child);
-                population = SurvivalSelection(population, child);
+                    child.Fitness = CheckFitness(conflictMatrix, child);
+                    population = SurvivalSelection(population, child);
+                }
                 //Implement genetic operators
-                if (gen == 200)
+                if (gen == 10000)
                     run = false;
             }
 
@@ -244,13 +247,15 @@ namespace TimetableGenerator
                         break;
 
                     case 1:
-                        KeyValuePair<int, int> biggestExam = new(examID, students[examID].Count);
+                        KeyValuePair<int, int> currentExam = new(examID, students[examID].Count);
 
-                        if (biggestExam.Value < students[conflicts[0]].Count)
-                            break;
-                        //Console.WriteLine($"{examID} cannot be placed");
-                        else
+                        if (currentExam.Value > students[conflicts[0]].Count)
+                        {
+                            assignedExams.Add(examID);
+                            assignedExams.Remove(conflicts[0]);
+                            timetable[currentTimeslot] = new(assignedExams);
                             AssignBackup(timetable, conflictMatrix, ch, conflicts[0]);
+                        }
                         break;
 
                     default:
