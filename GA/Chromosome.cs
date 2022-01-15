@@ -8,7 +8,7 @@ namespace TimetableGenerator.GA
     public class Chromosome
     {
         //Properties
-        public List<Gene> Genes { get; set; }
+        public List<int> ExamIDs { get; set; }
         public List<int> Timeslots { get; set; }
         public List<int> ReserveTimeslots { get; set; }
         public double Fitness { get; set; }
@@ -18,19 +18,19 @@ namespace TimetableGenerator.GA
 
         public Chromosome(Chromosome ch)//Make a copy of the chromosome
         {
-            Genes = new List<Gene>(ch.Genes);
-            Timeslots = new List<int>(ch.Timeslots);
-            ReserveTimeslots = new List<int>(ch.ReserveTimeslots);
+            ExamIDs = new (ch.ExamIDs);
+            Timeslots = new (ch.Timeslots);
+            ReserveTimeslots = new (ch.ReserveTimeslots);
             Fitness = ch.Fitness;
         }
         
         public Chromosome(int maxTimeslot, Dictionary<int, List<int>> exams)
         {
-            Genes = new List<Gene>();
-            Timeslots = new List<int>();
-            ReserveTimeslots = new List<int>();
+            ExamIDs = new ();
+            Timeslots = new ();
+            ReserveTimeslots = new ();
 
-            GenerateChromosome(exams);
+            GenerateChromosome(exams.Count);
             GenerateTimeslot(Timeslots, maxTimeslot);
             GenerateTimeslot(ReserveTimeslots, maxTimeslot);
         }
@@ -38,29 +38,30 @@ namespace TimetableGenerator.GA
         //Methods
         private void GenerateTimeslot(List <int> timeslots, int maxTimeslot)
         {
-            while(timeslots.Count < Genes.Count)
+            while(timeslots.Count < ExamIDs.Count)
             {
                 int timeslot = Settings.rand.Next(1, maxTimeslot + 1);
                 timeslots.Add(timeslot);
             }
         }
 
-        private void GenerateChromosome(Dictionary<int, List<int>> exams)
+        private void GenerateChromosome(int examCount)
         {
-            //Use list to ensure there are no duplicate exams placed in the chromosome
-            List<int> examTracker = new();
-            for(int i = 0; i < exams.Count(); i++)
+            List<int> nums = Enumerable.Range(1, examCount).ToList();
+            for(int i = 0; i < examCount; i++)
             {
-                int examID = Settings.rand.Next(1, exams.Count+1);
+                int examID = Settings.rand.Next(1, examCount);
 
-                if (!examTracker.Contains(examID))
-                {
-                    examTracker.Add(examID);
-                    Gene g = new(examID);
-                    Genes.Add(g);
-                }
+                while(!nums.Contains(examID) && nums.Count > 1)
+                    examID = Settings.rand.Next(1, examCount);
 
+                if (nums.Count == 1)
+                    examID = nums[0];
+
+                ExamIDs.Add(examID);
+                nums.Remove(examID);
             }
+            Console.Read();
         }
     }
 }

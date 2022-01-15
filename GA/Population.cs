@@ -45,7 +45,7 @@ namespace TimetableGenerator.GA
             bool result = false;
             Chromosomes.ForEach(ch =>
             {
-                if (ch.Genes.SequenceEqual(chromosome.Genes))
+                if (ch.ExamIDs.SequenceEqual(chromosome.ExamIDs))
                     result = true;
 
             });

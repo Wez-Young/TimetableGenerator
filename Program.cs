@@ -33,12 +33,6 @@ namespace TimetableGenerator
                     Chromosome p2 = SelectParent(population);
                     Chromosome child = CrossoverOperators.PartiallyMapped(p1, p2);
 
-                    population.Chromosomes.ForEach(x =>
-                    {
-                        if (x.Genes.Count < students.Count)
-                            Console.ReadLine();
-                    });
-
                     while (CheckDuplicate(population, child))
                         child = CrossoverOperators.PartiallyMapped(p1, p2);
 
@@ -46,7 +40,7 @@ namespace TimetableGenerator
                     population = SurvivalSelection(population, child);
                 }
                 //Implement genetic operators
-                if (gen == 10000)
+                if (gen == 100)
                     run = false;
             }
 
@@ -151,7 +145,7 @@ namespace TimetableGenerator
             for (int i = 1; i <= Settings.maxTimeslot; i++)
                 Timetable.Add(i, new());
             //Go through the permutation of exams
-            foreach (var exam in ch.Genes)
+            foreach (var exam in ch.ExamIDs)
             {
                 //Get the next timeslot in the permutation at the same index as the exam
                 int currentTimeslot = ch.Timeslots[index];
@@ -160,7 +154,7 @@ namespace TimetableGenerator
                 //Add exam to list in timeslot if there are no other assigned exams
                 if (assignedExams.Count == 0)
                 {
-                    assignedExams.Add(exam.Event);
+                    assignedExams.Add(exam);
                     Timetable[currentTimeslot] = assignedExams;
                 }
                 else
@@ -170,7 +164,7 @@ namespace TimetableGenerator
                     foreach (var assigned in assignedExams)
                     {
                         //Do nothing if there is no conflict
-                        if (conflictMatrix[exam.Event - 1, assigned - 1] == 0)
+                        if (conflictMatrix[exam - 1, assigned - 1] == 0)
                             continue;
                         else
                             //Add the conflicting assigned exam to the conflicts list
@@ -181,12 +175,12 @@ namespace TimetableGenerator
                     switch (conflicts.Count)
                     {
                         case 0://Assign the current exam as there is no conflicts
-                            assignedExams.Add(exam.Event);
+                            assignedExams.Add(exam);
                             Timetable[currentTimeslot] = new(assignedExams);
                             break;
 
                         case 1://Check if the conflicting exam or the current one is larger based on the number of students
-                            KeyValuePair<int, int> biggestExam = new(exam.Event, students[exam.Event].Count);
+                            KeyValuePair<int, int> biggestExam = new(exam, students[exam].Count);
 
                             if (biggestExam.Value < students[conflicts[0]].Count)
                                 //Attempt to assign the current exam to its backup timeslot
@@ -195,7 +189,7 @@ namespace TimetableGenerator
                             {
                                 //Remove the assigned exam - smaller exam
                                 assignedExams.Remove(conflicts[0]);
-                                assignedExams.Add(exam.Event);
+                                assignedExams.Add(exam);
                                 Timetable[currentTimeslot] = new(assignedExams);
                                 //Attempt to assign the assigned exam to its reserved timeslot
                                 AssignBackup(Timetable, conflictMatrix, ch, conflicts[0]);
@@ -204,7 +198,7 @@ namespace TimetableGenerator
 
                         default:
                             //If the number of conflicting exams is greater than one, directly attempt to assign exam to back up timeslot 
-                            AssignBackup(Timetable, conflictMatrix, ch, exam.Event);
+                            AssignBackup(Timetable, conflictMatrix, ch, exam);
                             break;
                     }
                 }
@@ -212,14 +206,14 @@ namespace TimetableGenerator
                 index++;
             }
             //Calculate fitness based onthe number of unplaced exams divided by the total number of exams e.g., 33/190 = fitness
-            fitness = Math.Round((double)(ch.Genes.Count - Timetable.Values.Sum(list => list.Count)) / ch.Genes.Count , 4);
+            fitness = Math.Round((double)(ch.ExamIDs.Count - Timetable.Values.Sum(list => list.Count)) / ch.ExamIDs.Count , 4);
             return fitness;
         }
 
         //Attempt to assign exam to its reserve timeslot
         private static void AssignBackup(Dictionary<int, List<int>> timetable, int[,] conflictMatrix, Chromosome ch, int examID)
         {
-            int index = ch.Genes.FindIndex(gene => gene.Event == examID);
+            int index = ch.ExamIDs.FindIndex(id => id == examID);
 
             //Get the next timeslot in the permutation
             int currentTimeslot = ch.ReserveTimeslots[index];
@@ -294,7 +288,7 @@ namespace TimetableGenerator
 
                 pop.Chromosomes.ForEach(chromosome =>
                 {
-                    if (chromosome.Genes.SequenceEqual(ch.Genes))
+                    if (chromosome.ExamIDs.SequenceEqual(ch.ExamIDs))
                         result = true;
                 });
 
