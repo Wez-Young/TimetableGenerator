@@ -19,7 +19,7 @@ namespace TimetableGenerator
             int[,] conflictMatrix = new int[students.Count, students.Count];
             CreateConflictMatrix(conflictMatrix);
 
-            Population population = new(popSize, students.Count, Settings.maxTimeslot, students);
+            Population population = new(popSize, Settings.maxTimeslot, students);
             population.Chromosomes.ForEach(ch => ch.Fitness = CheckFitness(conflictMatrix, ch)); 
             bool run = true;
             while (run)
@@ -32,6 +32,15 @@ namespace TimetableGenerator
                     Chromosome p1 = SelectParent(population);
                     Chromosome p2 = SelectParent(population);
                     Chromosome child = CrossoverOperators.PartiallyMapped(p1, p2);
+
+                    population.Chromosomes.ForEach(x =>
+                    {
+                        if (x.Genes.Count < students.Count)
+                            Console.ReadLine();
+                    });
+
+                    while (CheckDuplicate(population, child))
+                        child = CrossoverOperators.PartiallyMapped(p1, p2);
 
                     child.Fitness = CheckFitness(conflictMatrix, child);
                     population = SurvivalSelection(population, child);
@@ -277,6 +286,20 @@ namespace TimetableGenerator
             }
 
             return pop;
+        }
+
+        private static bool CheckDuplicate(Population pop, Chromosome ch)
+        {
+            bool result = false;
+
+                pop.Chromosomes.ForEach(chromosome =>
+                {
+                    if (chromosome.Genes.SequenceEqual(ch.Genes))
+                        result = true;
+                });
+
+
+            return result;
         }
     }
 }

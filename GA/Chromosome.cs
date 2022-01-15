@@ -24,13 +24,13 @@ namespace TimetableGenerator.GA
             Fitness = ch.Fitness;
         }
         
-        public Chromosome(int length, int maxTimeslot, Dictionary<int, List<int>> exams)
+        public Chromosome(int maxTimeslot, Dictionary<int, List<int>> exams)
         {
             Genes = new List<Gene>();
             Timeslots = new List<int>();
             ReserveTimeslots = new List<int>();
 
-            GenerateChromosome(length, exams);
+            GenerateChromosome(exams);
             GenerateTimeslot(Timeslots, maxTimeslot);
             GenerateTimeslot(ReserveTimeslots, maxTimeslot);
         }
@@ -45,19 +45,21 @@ namespace TimetableGenerator.GA
             }
         }
 
-        private void GenerateChromosome(int length, Dictionary<int, List<int>> exams)
+        private void GenerateChromosome(Dictionary<int, List<int>> exams)
         {
-            var examIDs = new List<int>(exams.Keys);
-            //Adds x amount of genes based on specified length
-            for(int i = 0; i < length; i++)
+            //Use list to ensure there are no duplicate exams placed in the chromosome
+            List<int> examTracker = new();
+            for(int i = 0; i < exams.Count(); i++)
             {
-                //Gets random index
-                int index = Settings.rand.Next(examIDs.Count);
-                //Assigns the value associated to the index to the gene
-                Gene gene = new Gene(examEvent: examIDs[index]);
-                Genes.Add(gene);
-                //Removes the item from list to avoid duplicates
-                examIDs.Remove(gene.Event);
+                int examID = Settings.rand.Next(1, exams.Count+1);
+
+                if (!examTracker.Contains(examID))
+                {
+                    examTracker.Add(examID);
+                    Gene g = new(examID);
+                    Genes.Add(g);
+                }
+
             }
         }
     }

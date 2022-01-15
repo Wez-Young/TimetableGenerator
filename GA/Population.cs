@@ -15,20 +15,20 @@ namespace TimetableGenerator.GA
             Chromosomes = new List<Chromosome>();
         }
 
-        public Population(int popSize, int length, int maxTimeSlot, Dictionary<int, List<int>> exams)
+        public Population(int popSize, int maxTimeSlot, Dictionary<int, List<int>> exams)
         {
             Chromosomes = new List<Chromosome>();
-            GenerateInitialPopulation(popSize, length, maxTimeSlot, exams);
+            GenerateInitialPopulation(popSize, maxTimeSlot, exams);
         }
 
         //Methods
         //Creates the initial population
-        private void GenerateInitialPopulation(int populationSize, int length, int maxTimeSlot, Dictionary<int, List<int>> exams)
+        private void GenerateInitialPopulation(int populationSize, int maxTimeSlot, Dictionary<int, List<int>> exams)
         {
             //Creates population equal to populationSize
             for(int i = 0; i < populationSize; i++)
             {
-                var newChromosome = new Chromosome(length, maxTimeSlot, exams);
+                var newChromosome = new Chromosome(maxTimeSlot, exams);
 
                 if (!CheckPermutationExists(newChromosome))
                 {
@@ -42,10 +42,15 @@ namespace TimetableGenerator.GA
 
         private bool CheckPermutationExists(Chromosome chromosome)//Checks if new permutation already exists
         {
-            if (Chromosomes.Any(ch => ch == chromosome))
-                return true;
+            bool result = false;
+            Chromosomes.ForEach(ch =>
+            {
+                if (ch.Genes.SequenceEqual(chromosome.Genes))
+                    result = true;
 
-            return false;
+            });
+
+            return result;
         }
 
         public Chromosome WorstFitness()

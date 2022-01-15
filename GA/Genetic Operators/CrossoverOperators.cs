@@ -85,5 +85,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
 
             return child;
         }
+
+
     }
 }
