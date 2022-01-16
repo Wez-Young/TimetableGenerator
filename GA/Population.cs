@@ -7,17 +7,22 @@ namespace TimetableGenerator.GA
     public class Population
     {
         //Properties
-        public List<Chromosome> Chromosomes { get; }
+        public List<Chromosome> Chromosomes { get; set; }
 
         //Constructors
         public Population() 
         {
-            Chromosomes = new List<Chromosome>();
+            Chromosomes = new ();
+        }
+
+        public Population(Population pop)
+        {
+            Chromosomes = new(pop.Chromosomes);
         }
 
         public Population(int popSize, int maxTimeSlot, Dictionary<int, List<int>> exams)
         {
-            Chromosomes = new List<Chromosome>();
+            Chromosomes = new ();
             GenerateInitialPopulation(popSize, maxTimeSlot, exams);
         }
 
@@ -28,7 +33,7 @@ namespace TimetableGenerator.GA
             //Creates population equal to populationSize
             for(int i = 0; i < populationSize; i++)
             {
-                var newChromosome = new Chromosome(maxTimeSlot, exams);
+                Chromosome newChromosome = new (maxTimeSlot, exams);
 
                 if (!CheckPermutationExists(newChromosome))
                 {

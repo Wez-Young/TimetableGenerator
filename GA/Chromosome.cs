@@ -61,7 +61,6 @@ namespace TimetableGenerator.GA
                 ExamIDs.Add(examID);
                 nums.Remove(examID);
             }
-            Console.Read();
         }
     }
 }
