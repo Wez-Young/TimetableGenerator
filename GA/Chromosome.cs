@@ -12,33 +12,36 @@ namespace TimetableGenerator.GA
         public List<int> Timeslots { get; set; }
         public List<int> ReserveTimeslots { get; set; }
         public double Fitness { get; set; }
+        public Dictionary<int, List<int>> Timetable { get; set; }
 
         //Constructors
-        public Chromosome() {}
+        public Chromosome() { }
 
         public Chromosome(Chromosome ch)//Make a copy of the chromosome
         {
-            ExamIDs = new (ch.ExamIDs);
-            Timeslots = new (ch.Timeslots);
-            ReserveTimeslots = new (ch.ReserveTimeslots);
+            ExamIDs = new(ch.ExamIDs);
+            Timeslots = new(ch.Timeslots);
+            ReserveTimeslots = new(ch.ReserveTimeslots);
             Fitness = ch.Fitness;
+            Timetable = ch.Timetable;
         }
-        
+
         public Chromosome(int maxTimeslot, Dictionary<int, List<int>> exams)
         {
-            ExamIDs = new ();
-            Timeslots = new ();
-            ReserveTimeslots = new ();
+            ExamIDs = new();
+            Timeslots = new();
+            ReserveTimeslots = new();
+            Timetable = new();
 
             GenerateChromosome(exams.Count);
             GenerateTimeslot(Timeslots, maxTimeslot);
             GenerateTimeslot(ReserveTimeslots, maxTimeslot);
         }
-        
+
         //Methods
-        private void GenerateTimeslot(List <int> timeslots, int maxTimeslot)
+        private void GenerateTimeslot(List<int> timeslots, int maxTimeslot)
         {
-            while(timeslots.Count < ExamIDs.Count)
+            while (timeslots.Count < ExamIDs.Count)
             {
                 int timeslot = Settings.rand.Next(1, maxTimeslot + 1);
                 timeslots.Add(timeslot);
@@ -48,11 +51,11 @@ namespace TimetableGenerator.GA
         private void GenerateChromosome(int examCount)
         {
             List<int> nums = Enumerable.Range(1, examCount).ToList();
-            for(int i = 0; i < examCount; i++)
+            for (int i = 0; i < examCount; i++)
             {
                 int examID = Settings.rand.Next(1, examCount);
 
-                while(!nums.Contains(examID) && nums.Count > 1)
+                while (!nums.Contains(examID) && nums.Count > 1)
                     examID = Settings.rand.Next(1, examCount);
 
                 if (nums.Count == 1)

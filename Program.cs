@@ -16,20 +16,20 @@ namespace TimetableGenerator
 
         static void Main()
         {
-            int popSize = 100, gen = 0;
+            int popSize = 50, gen = 0;
             students = new(new SortedDictionary<int, List<int>>(ReadFile("ear-f-83.stu")));
 
             int[,] conflictMatrix = new int[students.Count, students.Count];
             CreateConflictMatrix(conflictMatrix);
 
             Population population = new(popSize, Settings.maxTimeslot, students);
-            population.Chromosomes.ForEach(ch => ch.Fitness = CheckFitness(conflictMatrix, ch)); 
+            population.Chromosomes.ForEach(ch => ch.Fitness = CheckFitness(conflictMatrix, ch));
             bool run = true;
             timer.Start();
             while (run)
             {
                 gen++;
-                Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().Fitness} Worst Fitness: {population.WorstFitness().Fitness}");
+                Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().Fitness} No. unplaced exams: {Math.Round(population.BestFitness().Fitness * students.Count)}");
 
                 Population elites = new();
                 //Get the x top chromsomes based on the fitness
@@ -41,29 +41,52 @@ namespace TimetableGenerator
                 //Add the elites back into the population
                 population.Chromosomes.AddRange(elites.Chromosomes);
 
+                List<Chromosome> children = new();
                 //Create the rest of the population through children of the surviving x*2
                 for (int i = population.Chromosomes.Count; i < popSize; i++)
                 {
                     //Create child based on two randomly selected chromosomes using the PartiallyMapped Crossover method
                     Chromosome child = CrossoverOperators.PartiallyMapped(SelectParent(population), SelectParent(population));
                     child = MutationOperators.SwapMutate(child);
+                    //child = MutationOperators.ScrambleMutate(child);
+                    //child = MutationOperators.SwapMutate(child); Adding a second swap mutate slows down the evolution of the timetables
                     //if(Settings.rand.NextDouble() > Settings.mutationProbability)
-                        //child = MutationOperators.ReverseMutate(child);
+                    //child = MutationOperators.ReverseMutate(child);
 
                     child.Fitness = CheckFitness(conflictMatrix, child);
-                    population.Chromosomes.Add(child);
+                    children.Add(child);
                 }
+                //Add newly created children to the population
+                population.Chromosomes.AddRange(children);
                 //Implement genetic operators
-                if (population.BestFitness().Fitness == 0 || gen == 100000000)
+                if (population.BestFitness().Fitness == 0 || gen == 10000)
                 {
                     run = false;
                     timer.Stop();
                 }
             }
 
-            Console.WriteLine($"Timer elapsed: {timer.Elapsed}");
-            Console.WriteLine($"Best Fitness: {population.BestFitness().Fitness}");
-            Console.WriteLine($"Total No. unplaced exams: {population.BestFitness().Fitness * students.Count}");
+            Console.WriteLine($"Timer elapsed: {timer.Elapsed} Generation: {gen}");
+            Console.WriteLine($"Best Fitness: {population.BestFitness().Fitness} No. unplaced exams: {Math.Round(population.BestFitness().Fitness * students.Count)}");
+
+
+            population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
+            population.BestFitness().ExamIDs.ForEach(id =>
+            {
+                bool result = false;
+                foreach (var item in population.BestFitness().Timetable)
+                {
+                    if (item.Value.Contains(id))
+                    {
+                        Console.Write($"{item.Key} ");
+                        result = true;
+                    }
+                }
+
+                if (!result)
+                    Console.Write("0 ");
+
+            });
         }
 
         //Reads in and sorts the data from a file  
@@ -157,23 +180,24 @@ namespace TimetableGenerator
         private static double CheckFitness(int[,] conflictMatrix, Chromosome ch)
         {
             double fitness = 0;
-            Dictionary<int, List<int>> Timetable = new();
-            int index = 0;
+            Dictionary<int, List<int>> timetable = new();
+            int index = -1;
             //Populate timetable with timeslot number (ID) and an empty assigned exam list
             for (int i = 1; i <= Settings.maxTimeslot; i++)
-                Timetable.Add(i, new());
+                timetable.Add(i, new());
             //Go through the permutation of exams
             foreach (var exam in ch.ExamIDs)
             {
+                index++;
                 //Get the next timeslot in the permutation at the same index as the exam
                 int currentTimeslot = ch.Timeslots[index];
                 //Create a copy of the current assigned exams in the timeslot
-                List<int> assignedExams = new(Timetable[currentTimeslot]);
+                List<int> assignedExams = new(timetable[currentTimeslot]);
                 //Add exam to list in timeslot if there are no other assigned exams
                 if (assignedExams.Count == 0)
                 {
                     assignedExams.Add(exam);
-                    Timetable[currentTimeslot] = assignedExams;
+                    timetable[currentTimeslot] = assignedExams;
                 }
                 else
                 {
@@ -194,7 +218,7 @@ namespace TimetableGenerator
                     {
                         case 0://Assign the current exam as there is no conflicts
                             assignedExams.Add(exam);
-                            Timetable[currentTimeslot] = new(assignedExams);
+                            timetable[currentTimeslot] = new(assignedExams);
                             break;
 
                         case 1://Check if the conflicting exam or the current one is larger based on the number of students
@@ -202,29 +226,29 @@ namespace TimetableGenerator
 
                             if (biggestExam.Value < students[conflicts[0]].Count)
                                 //Attempt to assign the current exam to its backup timeslot
-                                AssignBackup(Timetable, conflictMatrix, ch, biggestExam.Key);
+                                AssignBackup(timetable, conflictMatrix, ch, biggestExam.Key);
                             else
                             {
                                 //Remove the assigned exam - smaller exam
                                 assignedExams.Remove(conflicts[0]);
                                 assignedExams.Add(exam);
-                                Timetable[currentTimeslot] = new(assignedExams);
+                                timetable[currentTimeslot] = new(assignedExams);
                                 //Attempt to assign the assigned exam to its reserved timeslot
-                                AssignBackup(Timetable, conflictMatrix, ch, conflicts[0]);
+                                AssignBackup(timetable, conflictMatrix, ch, conflicts[0]);
                             }
                             break;
 
                         default:
                             //If the number of conflicting exams is greater than one, directly attempt to assign exam to back up timeslot 
-                            AssignBackup(Timetable, conflictMatrix, ch, exam);
+                            AssignBackup(timetable, conflictMatrix, ch, exam);
                             break;
                     }
                 }
-
-                index++;
             }
+
+            ch.Timetable = new(timetable);
             //Calculate fitness based onthe number of unplaced exams divided by the total number of exams e.g., 33/190 = fitness
-            fitness = Math.Round((double)(ch.ExamIDs.Count - Timetable.Values.Sum(list => list.Count)) / ch.ExamIDs.Count , 4);
+            fitness = Math.Round((double)(ch.ExamIDs.Count - timetable.Values.Sum(list => list.Count)) / ch.ExamIDs.Count, 4);
             return fitness;
         }
 
@@ -312,7 +336,7 @@ namespace TimetableGenerator
             //Choose random chromosome
             Chromosome competitor = pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)];
             //Compare the fitness, if child has lower remove competitor and add child
-            if(competitor.Fitness > child.Fitness)
+            if (competitor.Fitness > child.Fitness)
             {
                 pop.Chromosomes.Remove(competitor);
                 pop.Chromosomes.Add(child);
@@ -328,11 +352,11 @@ namespace TimetableGenerator
             cumalativeFitnesses[0] = pop.Chromosomes[0].Fitness;
 
             //Add fitness of the next xhromsome on top of the previous one and add it to list
-            for(int i = 1; i < pop.Chromosomes.Count; i++)
+            for (int i = 1; i < pop.Chromosomes.Count; i++)
                 cumalativeFitnesses[i] = cumalativeFitnesses[i - 1] + pop.Chromosomes[i].Fitness;
 
             //Create empty list with a size of the number of x surviors 
-            List<Chromosome> selection = new(new Chromosome[(pop.Chromosomes.Count+Settings.elitismPercentage) / Settings.elitismPercentage]);
+            List<Chromosome> selection = new(new Chromosome[(pop.Chromosomes.Count + Settings.elitismPercentage) / Settings.elitismPercentage]);
 
             for (int i = 0; i < selection.Count; i++)
             {
@@ -351,6 +375,6 @@ namespace TimetableGenerator
             pop.Chromosomes = selection;
             return pop;
         }
-        
+
     }
 }
