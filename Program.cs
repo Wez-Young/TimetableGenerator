@@ -43,18 +43,20 @@ namespace TimetableGenerator
 
                 List<Chromosome> children = new();
                 //Create the rest of the population through children of the surviving x*2
-                for (int i = population.Chromosomes.Count; i < popSize; i++)
+                for (int i = population.Chromosomes.Count; i < popSize; i+=2)
                 {
+                    List<Chromosome> tempChildren = new();
                     //Create child based on two randomly selected chromosomes using the PartiallyMapped Crossover method
-                    Chromosome child = CrossoverOperators.PartiallyMapped(SelectParent(population), SelectParent(population));
-                    child = MutationOperators.SwapMutate(child);
+                    //tempChildren.AddRange(CrossoverOperators.PartiallyMappedCrossover(SelectParent(population), SelectParent(population)));
+                    tempChildren.Add(CrossoverOperators.OrderedCrossover(SelectParent(population), SelectParent(population)));
+                    tempChildren.ForEach(child => child = MutationOperators.SwapMutate(child));
+
                     //child = MutationOperators.ScrambleMutate(child);
                     //child = MutationOperators.SwapMutate(child); Adding a second swap mutate slows down the evolution of the timetables
                     //if(Settings.rand.NextDouble() > Settings.mutationProbability)
                     //child = MutationOperators.ReverseMutate(child);
-
-                    child.Fitness = CheckFitness(conflictMatrix, child);
-                    children.Add(child);
+                    children.AddRange(tempChildren);
+                    children.ForEach(child => { child.Fitness = CheckFitness(conflictMatrix, child); });
                 }
                 //Add newly created children to the population
                 population.Chromosomes.AddRange(children);
@@ -68,20 +70,18 @@ namespace TimetableGenerator
 
             Console.WriteLine($"Timer elapsed: {timer.Elapsed} Generation: {gen}");
             Console.WriteLine($"Best Fitness: {population.BestFitness().Fitness} No. unplaced exams: {Math.Round(population.BestFitness().Fitness * students.Count)}");
-
+            Console.WriteLine($"No. of Conflicts: {CheckConflicts(conflictMatrix, population.BestFitness())}");
 
             population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
             population.BestFitness().ExamIDs.ForEach(id =>
             {
                 bool result = false;
                 foreach (var item in population.BestFitness().Timetable)
-                {
                     if (item.Value.Contains(id))
                     {
                         Console.Write($"{item.Key} ");
                         result = true;
                     }
-                }
 
                 if (!result)
                     Console.Write("0 ");
@@ -311,22 +311,27 @@ namespace TimetableGenerator
             }
         }
 
-        private static bool CheckDuplicate(Population pop, Chromosome ch)
+        private static int CheckConflicts(int[,] conflictMatrix, Chromosome solution)
         {
-            bool result = false;
-            Population popCopy = new(pop);
-            pop.Chromosomes.ForEach(chromosome =>
-            {
-                if (chromosome.ExamIDs.SequenceEqual(ch.ExamIDs) && chromosome.Timeslots.SequenceEqual(ch.Timeslots) && chromosome.ReserveTimeslots.SequenceEqual(ch.ReserveTimeslots))
-                {
-                    popCopy = RandomSelection(popCopy, ch);
-                    result = true;
-                }
-            });
-            pop = new(popCopy);
+            int conflicts = 0;
 
-            return result;
-        }//Possibly not needed
+            foreach(var item in solution.Timetable)
+            {
+                var list = item.Value;
+                for(int i = 0; i < list.Count; i++)
+                {
+                    var currentExam = list[i];
+
+                    foreach(var exam in list)
+                    {
+                        if (currentExam == exam)
+                            continue;
+                        conflicts += conflictMatrix[currentExam - 1, exam -1];
+                    }
+                }
+            }
+            return conflicts;
+        }
 
         //---Survival Selection Methods---
 

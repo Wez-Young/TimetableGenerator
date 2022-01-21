@@ -17,6 +17,11 @@ namespace TimetableGenerator.GA
         //Constructors
         public Chromosome() { }
 
+        public Chromosome (int size)
+        {
+            ExamIDs = new(new int[size]);
+        }
+
         public Chromosome(Chromosome ch)//Make a copy of the chromosome
         {
             ExamIDs = new(ch.ExamIDs);
