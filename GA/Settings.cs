@@ -8,7 +8,7 @@ namespace TimetableGenerator.GA
         public static int maxTimeslot = 24;
 
         public static int elitismPercentage = 5;
-        public static double mutationProbability = 0.4;
-        public static double crossoverProbability = 0.8;
+        public static double mutationProbability = 0.6;
+        public static double crossoverProbability = 0.7;
     }
 }
