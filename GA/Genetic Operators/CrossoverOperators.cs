@@ -9,11 +9,14 @@ namespace TimetableGenerator.GA.Genetic_Operators
     public class CrossoverOperators
     {
 
-        public static List<Chromosome> PartiallyMappedCrossover(Chromosome p1, Chromosome p2)
+        public static void PartiallyMappedCrossover(List<Chromosome> children, Chromosome p1, Chromosome p2)
         {
+            if (Settings.rand.NextDouble() > Settings.crossoverProbability)
+                return;
+
             //create new children
-            Chromosome c1 = new Chromosome(p1.ExamIDs.Count);
-            Chromosome c2 = new Chromosome(p1.ExamIDs.Count);
+            Chromosome c1 = new(p1.ExamIDs.Count);
+            Chromosome c2 = new(p1.ExamIDs.Count);
             c1.Timeslots = new(p1.Timeslots);
             c2.Timeslots = new(p1.Timeslots);
             c1.ReserveTimeslots = new(p2.ReserveTimeslots);
@@ -71,13 +74,14 @@ namespace TimetableGenerator.GA.Genetic_Operators
             CheckDupeGene(c1);
             CheckDupeGene(c2);
 
-            return new List<Chromosome> {
-                c1, c2
-            };
+            children.AddRange(new List<Chromosome> { c1, c2 });
         }
 
-        public static Chromosome OrderedCrossover(Chromosome p1, Chromosome p2)
+        public static void OrderedCrossover(List<Chromosome> children, Chromosome p1, Chromosome p2)
         {
+            if (Settings.rand.NextDouble() > Settings.crossoverProbability)
+                return;
+
             //set cut points
             int cutpointOne = Settings.rand.Next(p1.ExamIDs.Count);
             int cutpointTwo = Settings.rand.Next(cutpointOne, p1.ExamIDs.Count);
@@ -116,7 +120,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
 
             CheckDupeGene(child);
 
-            return child;
+            children.Add(child);
         }
 
         //Check if children contain duplicate genes

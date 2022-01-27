@@ -9,28 +9,35 @@ namespace TimetableGenerator.GA.Genetic_Operators
     public class MutationOperators
     {
 
-        public static Chromosome SwapMutate(Chromosome child)
+        public static void SwapMutate(List<Chromosome> children)
         {
-            //Swap mutate the permutation of the exam IDs
-            int index1 = Settings.rand.Next(child.ExamIDs.Count);
-            int index2 = Settings.rand.Next(child.ExamIDs.Count);
+            foreach (var child in children)
+            {
+                if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                    continue;
+                //Swap mutate the permutation of the exam IDs
+                int index1 = Settings.rand.Next(child.ExamIDs.Count);
+                int index2 = Settings.rand.Next(child.ExamIDs.Count);
 
-            while (index1 == index2)
-                index2 = Settings.rand.Next(child.ExamIDs.Count);
+                while (index1 == index2)
+                    index2 = Settings.rand.Next(child.ExamIDs.Count);
 
-            int tempGene = child.ExamIDs[index1];
+                int tempGene = child.ExamIDs[index1];
 
-            child.ExamIDs[index1] = child.ExamIDs[index2];
-            child.ExamIDs[index2] = tempGene;
+                child.ExamIDs[index1] = child.ExamIDs[index2];
+                child.ExamIDs[index2] = tempGene;
 
-            return child;
+                CheckDupeGene(child);
+            }
         }
 
         public static Chromosome ReverseMutate(Chromosome child)
         {
             child.ExamIDs.Reverse();
-            child.Timeslots.Reverse();
-            child.ReserveTimeslots.Reverse();
+            //child.Timeslots.Reverse();
+            //child.ReserveTimeslots.Reverse();
+
+            CheckDupeGene(child);
 
             return child;
         }
@@ -54,7 +61,16 @@ namespace TimetableGenerator.GA.Genetic_Operators
             for (int i = index1; i < index2; i++)
                 child.ExamIDs[i] = subset[i - index1];
 
+            CheckDupeGene(child);
+
             return child;
+        }
+
+        public static void CheckDupeGene(Chromosome child)
+        {
+            if (child.ExamIDs.Count - child.ExamIDs.Distinct().Count() > 0)
+                Console.WriteLine("Duplicate genes!! Errors!!");
+
         }
     }
 }

@@ -45,19 +45,12 @@ namespace TimetableGenerator
                 //Create the rest of the population through children of the surviving x*2
                 for (int i = population.Chromosomes.Count; i < popSize; i++)
                 {
-                    List<Chromosome> tempChildren = new();
-                    if (Settings.rand.NextDouble() <= Settings.crossoverProbability)
-                        //Create child based on two randomly selected chromosomes using the PartiallyMapped Crossover method
-                        tempChildren.AddRange(CrossoverOperators.PartiallyMappedCrossover(SelectParent(population), SelectParent(population)));
-                    if (Settings.rand.NextDouble() <= Settings.crossoverProbability)
-                        tempChildren.Add(CrossoverOperators.OrderedCrossover(SelectParent(population), SelectParent(population)));
-                    if (Settings.rand.NextDouble() <= Settings.mutationProbability)
-                        tempChildren.ForEach(child => child = MutationOperators.SwapMutate(child));
-                    if (Settings.rand.NextDouble() <= Settings.mutationProbability)
-                        population.Chromosomes.Add(MutationOperators.SwapMutate(population.BestFitness()));
+                    //Create child based on two randomly selected chromosomes using a Crossover method
+                    CrossoverOperators.PartiallyMappedCrossover(children, SelectParent(population), SelectParent(population));
+                    CrossoverOperators.OrderedCrossover(children, SelectParent(population), SelectParent(population));
+                    MutationOperators.SwapMutate(children);
 
-                    i += tempChildren.Count - 1;
-                    children.AddRange(tempChildren);
+                    i += children.Count - 1;
                     children.ForEach(child => { child.Fitness = CheckFitness(conflictMatrix, child); });
                 }
                 //Add newly created children to the population
