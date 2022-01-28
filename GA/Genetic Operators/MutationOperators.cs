@@ -9,26 +9,24 @@ namespace TimetableGenerator.GA.Genetic_Operators
     public class MutationOperators
     {
 
-        public static void SwapMutate(List<Chromosome> children)
+        public static Chromosome SwapMutate(Chromosome child)
         {
-            foreach (var child in children)
-            {
-                if (Settings.rand.NextDouble() > Settings.mutationProbability)
-                    continue;
-                //Swap mutate the permutation of the exam IDs
-                int index1 = Settings.rand.Next(child.ExamIDs.Count);
-                int index2 = Settings.rand.Next(child.ExamIDs.Count);
+            if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                return child;
+            //Swap mutate the permutation of the exam IDs
+            int index1 = Settings.rand.Next(child.ExamIDs.Count);
+            int index2 = Settings.rand.Next(child.ExamIDs.Count);
 
-                while (index1 == index2)
-                    index2 = Settings.rand.Next(child.ExamIDs.Count);
+            while (index1 == index2)
+                index2 = Settings.rand.Next(child.ExamIDs.Count);
 
-                int tempGene = child.ExamIDs[index1];
+            int tempGene = child.ExamIDs[index1];
 
-                child.ExamIDs[index1] = child.ExamIDs[index2];
-                child.ExamIDs[index2] = tempGene;
+            child.ExamIDs[index1] = child.ExamIDs[index2];
+            child.ExamIDs[index2] = tempGene;
 
-                CheckDupeGene(child);
-            }
+            CheckDupeGene(child);
+            return child;
         }
 
         public static Chromosome ReverseMutate(Chromosome child)
