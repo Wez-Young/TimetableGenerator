@@ -14,7 +14,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
             if (Settings.rand.NextDouble() > Settings.crossoverProbability)
                 return;
 
-            //create new children
+            //initialise new children
             Chromosome c1 = new(p1.ExamIDs.Count);
             Chromosome c2 = new(p1.ExamIDs.Count);
             c1.Timeslots = new(p1.Timeslots);
@@ -58,7 +58,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
                 }
             }
             //Check for duplicate genes after the second cutpoint
-            for (int i = cutpointTwo; i < p1.ExamIDs.Count; i++)
+            for (int i = cutpointTwo; i < p2.ExamIDs.Count; i++)
             {
                 while (map1.ContainsKey(c1.ExamIDs[i]))
                 {
@@ -96,6 +96,8 @@ namespace TimetableGenerator.GA.Genetic_Operators
 
             for (int i = cutpointOne; i < cutpointTwo; i++)
             {
+                if(p1.ExamIDs.Count < 190)
+                    break;
                 //add parent one genes to child between the two cutpoints
                 child.ExamIDs[i] = p1.ExamIDs[i];
                 //Remove those genes from the copy of parent2 genes

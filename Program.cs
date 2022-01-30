@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using TimetableGenerator.GA;
 using TimetableGenerator.GA.Genetic_Operators;
+using System.Runtime.CompilerServices;
 
 namespace TimetableGenerator
 {
@@ -13,10 +14,12 @@ namespace TimetableGenerator
     {
         private static Dictionary<int, List<int>> examStudentList = new();
         private static Stopwatch timer = new();
+        public static int count = 0;
+
 
         static void Main()
         {
-            int popSize = 50, gen = 0;
+            int popSize = 100, gen = 0;
             examStudentList = new(new SortedDictionary<int, List<int>>(ReadFile("ear-f-83.stu")));
             Dictionary<int, int> conflictTracker = new();
 
@@ -25,6 +28,7 @@ namespace TimetableGenerator
 
             Population population = new(popSize, Settings.maxTimeslot, examStudentList.Count, conflictMatrix, conflictTracker);
             population.Chromosomes.ForEach(ch => ch.Fitness = CheckFitness(conflictMatrix, ch));
+
             bool run = true;
             timer.Start();
             while (run)
@@ -34,33 +38,37 @@ namespace TimetableGenerator
 
                 Population elites = new();
                 //Get the x top chromsomes based on the fitness
-                elites.Chromosomes = population.Chromosomes.OrderBy(x => x.Fitness).Take(Settings.elitismPercentage).ToList();
+                decimal percentage = popSize / 100m;
+                elites.Chromosomes = population.Chromosomes.OrderBy(x => x.Fitness).Take(Convert.ToInt32(percentage * Settings.elitismPercentage)).ToList();
                 //Remove the 'elite' chromosomes from the population to avoid duplication
                 population.Chromosomes.RemoveAll(x => elites.Chromosomes.Contains(x));
                 //Select another x num of chromosomes to go into the next generation
-                population = RouletteWheelSelection(population);
+                RouletteWheelSelection(population, "selection");
                 //Add the elites back into the population
                 population.Chromosomes.AddRange(elites.Chromosomes);
 
                 List<Chromosome> children = new();
-                //Create the rest of the population through children of the surviving x*2
+                //Create the rest of the population through children of the surviving population
                 for (int i = population.Chromosomes.Count; population.Chromosomes.Count + children.Count < popSize; i++)
                 {
                     //Create child based on two randomly selected chromosomes using a Crossover method
+                    CrossoverOperators.PartiallyMappedCrossover(children, new Chromosome(RouletteWheelSelection(population, "parent")), new Chromosome(RouletteWheelSelection(population, "parent")));
+                    CrossoverOperators.OrderedCrossover(children, new Chromosome(RouletteWheelSelection(population, "parent")), new Chromosome(RouletteWheelSelection(population, "parent")));
+
                     CrossoverOperators.PartiallyMappedCrossover(children, SelectParent(population), SelectParent(population));
                     CrossoverOperators.OrderedCrossover(children, SelectParent(population), SelectParent(population));
 
                     children.ForEach(child => MutationOperators.SwapMutate(child));
-
-                    children.ForEach(child => { child.Fitness = CheckFitness(conflictMatrix, child); });
+                    //children.ForEach(child => MutationOperators.ScrambleMutate(child));
+                    children.ForEach(child => {child.Fitness = CheckFitness(conflictMatrix, child); });
                 }
                 //Add newly created children to the population
                 population.Chromosomes.AddRange(children);
 
                 while (population.Chromosomes.Count > popSize)
-                    population = RandomSelection(population);
-                //Implement genetic operators
-                if (population.BestFitness().Fitness == 0 || gen == 10000)
+                    RouletteWheelSelection(population, "selection");
+       
+                if (population.BestFitness().Fitness == 0 )//|| gen == 100000)
                 {
                     run = false;
                     timer.Stop();
@@ -70,46 +78,46 @@ namespace TimetableGenerator
 
             PrintInfo(population, gen, conflictMatrix);
         }
-            //Reads in and sorts the data from a file  
-            private static Dictionary<int, List<int>> ReadFile(string filename)
+        //Reads in and sorts the data from a file  
+        private static Dictionary<int, List<int>> ReadFile(string filename)
+        {
+            //Splits each line of the file into seperate items
+            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{filename}"));
+            Dictionary<int, List<int>> exams = new();
+            int studentID = 0;
+
+            //Goes through each item within the list
+            foreach (var item in fileData)
             {
-                //Splits each line of the file into seperate items
-                List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{filename}"));
-                Dictionary<int, List<int>> exams = new();
-                int studentID = 0;
-
-                //Goes through each item within the list
-                foreach (var item in fileData)
+                studentID++;
+                //Splits the item into seperate exam IDs
+                foreach (var exam in item.Split(" "))
                 {
-                    studentID++;
-                    //Splits the item into seperate exam IDs
-                    foreach (var exam in item.Split(" "))
+                    if (exam.Equals(""))
+                        break;
+
+                    int examKey = Convert.ToInt32(exam);
+                    List<int> studentList;
+
+                    //Gets the current strudent list associated to the exam ID
+                    if (exams.ContainsKey(examKey))
+                        studentList = exams[examKey];
+                    else
                     {
-                        if (exam.Equals(""))
-                            break;
-
-                        int examKey = Convert.ToInt32(exam);
-                        List<int> studentList;
-
-                        //Gets the current strudent list associated to the exam ID
-                        if (exams.ContainsKey(examKey))
-                            studentList = exams[examKey];
-                        else
-                        {
-                            //Create a new student list if exam ID does not exist in exams list
-                            //and adds both new exam ID and new List to the Dictionary
-                            studentList = new List<int>();
-                            exams.Add(examKey, studentList);
-                        }
-                        //Adds the new student ID to the student list
-                        studentList.Add(studentID);
-                        //Updates the student list associated to the exam ID
-                        exams[examKey] = studentList;
+                        //Create a new student list if exam ID does not exist in exams list
+                        //and adds both new exam ID and new List to the Dictionary
+                        studentList = new List<int>();
+                        exams.Add(examKey, studentList);
                     }
+                    //Adds the new student ID to the student list
+                    studentList.Add(studentID);
+                    //Updates the student list associated to the exam ID
+                    exams[examKey] = studentList;
                 }
-
-                return exams;
             }
+
+            return exams;
+        }
 
         //Initialises the exam conflicts matrix
         private static void CreateConflictMatrix(int[,] matrix, Dictionary<int, int> conflictTracker)
@@ -136,15 +144,11 @@ namespace TimetableGenerator
         //Check the number of conflicts between two exams
         private static int FindConflicts(KeyValuePair<int, List<int>> firstExam, KeyValuePair<int, List<int>> nextExam)
         {
-            int conflicts = 0;
-
             List<int> allStudents = new(firstExam.Value);
             //Add students from both exams into one list
             allStudents.AddRange(nextExam.Value);
-            //Count the number of duplicate student IDs within the list
-            conflicts = allStudents.Count - allStudents.Distinct().Count();
-
-            return conflicts;
+            //return the number of duplicate student IDs within the list
+            return allStudents.Count - allStudents.Distinct().Count();
         }
 
         //Select a parent for reproducing
@@ -174,6 +178,7 @@ namespace TimetableGenerator
         //Calculate the fitness of a solution within the population
         private static double CheckFitness(int[,] conflictMatrix, Chromosome ch)
         {
+            count = 0;
             double fitness = 0;
             Dictionary<int, List<int>> timetable = new();
             int index = -1;
@@ -365,41 +370,83 @@ namespace TimetableGenerator
             //Compare the fitness, if child has lower remove competitor and add child
             if (competitor.Fitness > winner.Fitness)
                 pop.Chromosomes.Remove(competitor);
-
+            else
+                pop.Chromosomes.Remove(winner);
             return pop;
         }
 
-        private static Population RouletteWheelSelection(Population pop)
+        private static Chromosome RouletteWheelSelection(Population pop, string option)
         {
             //Get cumlative fitness
             List<double> cumalativeFitnesses = new(new double[pop.Chromosomes.Count]);
             cumalativeFitnesses[0] = pop.Chromosomes[0].Fitness;
 
-            //Add fitness of the next xhromsome on top of the previous one and add it to list
+            //Add fitness of the next chromsome on top of the previous one and add it to list
             for (int i = 1; i < pop.Chromosomes.Count; i++)
                 cumalativeFitnesses[i] = cumalativeFitnesses[i - 1] + pop.Chromosomes[i].Fitness;
 
-            //Create empty list with a size of the number of x surviors 
-            List<Chromosome> selection = new(new Chromosome[(pop.Chromosomes.Count + Settings.elitismPercentage) / Settings.elitismPercentage]);
-
-            for (int i = 0; i < selection.Count; i++)
+            switch (option)
             {
-                //Generate a random fitness value
-                double rndFitness = Settings.rand.NextDouble() * cumalativeFitnesses[cumalativeFitnesses.Count - 1];
-                //Find the index of the culmative value that is equal to the random fitness value
-                int index = cumalativeFitnesses.BinarySearch(rndFitness);
+                case "survival":
+                    //Create empty list with a size of the number of x surviors 
+                    List<Chromosome> selection = new(new Chromosome[(pop.Chromosomes.Count + Settings.elitismPercentage) / Settings.elitismPercentage]);
 
-                //Change index to a positive number
-                if (index < 0)
-                    index = Math.Abs(index + 1);
-                //Add the selected candidate to the selection list
-                selection[i] = (pop.Chromosomes[index]);
+                    for (int i = 0; i < selection.Count; i++)
+                    {
+                        //();
+                        Chromosome individual = SelectIndividual(pop, cumalativeFitnesses);
+                        selection[i] = individual;
+                    }
+                    //Assign the selection list to the population
+                    pop.Chromosomes = selection;
+                    break;
+                case "parent":
+
+                    Chromosome winner = new(SelectIndividual(pop, cumalativeFitnesses));
+                    for (int i = 1; i < Settings.tournamentSize; i++)
+                    {
+                        Chromosome candidate = new(SelectIndividual(pop, cumalativeFitnesses));
+
+                        while (winner.Equals(candidate))
+                            candidate = new(SelectIndividual(pop, cumalativeFitnesses));
+
+                        if (candidate.Fitness < winner.Fitness)
+                            winner = candidate;
+                    }
+                    return winner;
+
+                case "selection":
+                    Chromosome firstIndividual = SelectIndividual(pop, cumalativeFitnesses);
+                    for (int i = 1; i < Settings.tournamentSize; i++)
+                    {
+                        Chromosome candidate = SelectIndividual(pop, cumalativeFitnesses);
+
+                        while (firstIndividual.Equals(candidate))
+                            candidate = SelectIndividual(pop, cumalativeFitnesses);
+
+                        if (candidate.Fitness >= firstIndividual.Fitness)
+                            pop.Chromosomes.Remove(candidate);
+                        else
+                            pop.Chromosomes.Remove(firstIndividual);
+                    }
+                    break;
             }
-            //Assign the selection list to the population
-            pop.Chromosomes = selection;
-            return pop;
+
+            return null;
         }
 
+        private static Chromosome SelectIndividual(Population pop, List<double> cumalativeFitnesses)
+        {
+            //Generate a random fitness value
+            double rndFitness = Settings.rand.NextDouble() * cumalativeFitnesses[cumalativeFitnesses.Count - 1];
+            //Find the index of the culmative value that is equal to the random fitness value
+            int index = cumalativeFitnesses.BinarySearch(rndFitness);
+
+            //Change index to a positive number
+            if (index < 0)
+                index = Math.Abs(index + 1);
+
+            return pop.Chromosomes[index];
         }
     }
-
+}

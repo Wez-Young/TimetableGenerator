@@ -15,10 +15,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
                 return child;
             //Swap mutate the permutation of the exam IDs
             int index1 = Settings.rand.Next(child.ExamIDs.Count);
-            int index2 = Settings.rand.Next(child.ExamIDs.Count);
-
-            while (index1 == index2)
-                index2 = Settings.rand.Next(child.ExamIDs.Count);
+            int index2 = Settings.rand.Next(index1, child.ExamIDs.Count);
 
             int tempGene = child.ExamIDs[index1];
 
@@ -45,9 +42,6 @@ namespace TimetableGenerator.GA.Genetic_Operators
             //get two points
             int index1 = Settings.rand.Next(child.ExamIDs.Count);
             int index2 = Settings.rand.Next(index1, child.ExamIDs.Count);
-
-            while (index1 == index2 || index1 > index2)
-                index2 = Settings.rand.Next(index1, child.ExamIDs.Count);
 
             //create list based on items between the two points
             List<int> subset = new();

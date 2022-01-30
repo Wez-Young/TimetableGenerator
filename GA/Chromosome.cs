@@ -53,6 +53,7 @@ namespace TimetableGenerator.GA
             conflictTracker = conflictTracker.OrderBy(x => x.Value).Reverse().ToDictionary(x => x.Key, x => x.Value);
             GenerateChromosome(examCount);
             GenerateHeuristicTimeslot(Timeslots, maxTimeslot, conflictMatrix, conflictTracker);
+            int x = Timeslots.Max();
             GenerateTimeslot(ReserveTimeslots, maxTimeslot);
         }
 
@@ -94,76 +95,71 @@ namespace TimetableGenerator.GA
 
         private void GenerateHeuristicTimeslot(List<int> timeslots, int maxTimeslot, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
         {
-            int counter = 0;
-            foreach(var exam in conflictTracker)
+            //Go through each exam in the conflict list (already in order of most conflicts)
+            foreach (var exam in conflictTracker)
             {
-                int timeslot = 1;
+                //Get the index of the exam in the Exam Id list
                 int index = ExamIDs.IndexOf(exam.Key);
-                while (timeslots[index] == 0)
+                //Set timeslot value to 1 (first timeslot available)
+                int currentTimeslot = 1;
+                //While the value == 0 (null)
+                while (timeslots[index] == 0 && currentTimeslot <= Settings.maxTimeslot)
                 {
-                    if (timeslot <= maxTimeslot)
+                    //Set flag to false, assume there is no conflict
+                    bool conflicts = false;
+                    //if the exam is the first
+                    if (timeslots.All(x => x == 0))
                     {
-                        if (timeslots.All(x => x == 0))
-                        {
-                            timeslots[index] = timeslot;
-                            break;
-                        }
-
-                        var examsInTimeslot = ExamsInTimeslot(timeslot, timeslots);
-                        bool noConflicts = false;
-                        if (examsInTimeslot.Count != 0)
-                        {
-                            foreach (var assigned in examsInTimeslot)
+                        //set timeslot value to the item at the index of the timeslot list
+                        timeslots[index] = currentTimeslot;
+                        break;
+                    }
+                    //find all exam scheduled at the current timeslot
+                    List<int> scheduledExams = new();
+                    FindScheduledExams(scheduledExams, timeslots, currentTimeslot);
+                    //if there are already schduled exams in the timeslot
+                    if (scheduledExams.Count > 0)
+                        //go through each scheduled exam
+                        foreach (var scheduled in scheduledExams)
+                            //Check if there any conflicts between the current exam and the scheduled exam
+                            if (conflictMatrix[exam.Key - 1, scheduled - 1] != 0)
                             {
-                                if (conflictMatrix[exam.Key - 1, assigned - 1] == 0)
-                                {
-                                    noConflicts = true;
-                                    continue;
-                                }
-                                else
-                                {
-                                    noConflicts = false;
-                                    timeslot++;
-                                    break;
-                                }
+                                //if there is conflict increase timeslot
+                                currentTimeslot++;
+                                //set flag to true
+                                conflicts = true;
+                                //continue the search
+                                continue;
                             }
-                        }
-                        else
-                        {
-                            noConflicts = true;
-                        }
+                    //if there is no conflict found set timeslot
+                    if (!conflicts)
+                        timeslots[index] = currentTimeslot;
+                }
+                //If the exam can't be assigned a timeslot, randomly give it one
+                if (currentTimeslot > Settings.maxTimeslot)
+                    timeslots[index] = Settings.rand.Next(1, Settings.maxTimeslot + 1);
+            }
+        }
 
-                        if(noConflicts)
-                            timeslots[index] = timeslot;
-                    }
-                    else
-                    {
-                        counter++;
-                        timeslots[index] = Settings.rand.Next(1, maxTimeslot + 1);
-                    }
+        private void FindScheduledExams(List<int> scheduled, List<int> timeslots, int currentTimeslot)
+        {
+            List<int> indexList = new();
+            //go through all timeslots in the timeslot list
+            foreach(int timeslot in timeslots)
+            {
+                //if timeslot is equal to the current timeslot
+                if(timeslot == currentTimeslot)
+                {
+                    //add the index of the timeslot
+                    indexList.Add(timeslots.IndexOf(timeslot));
                 }
             }
 
-        }
-
-        private List<int> ExamsInTimeslot(int timeslot, List<int> timeslots)
-        {
-            List<int> indexList = new();
-
-            foreach (var item in timeslots)
+            //add exam id in ExamID list using the indexes
+            foreach(int index in indexList)
             {
-                if (item == timeslot)
-                    indexList.Add(timeslots.IndexOf(item));
+                scheduled.Add(ExamIDs[index]);
             }
-
-            List<int> examsInTimeslot = new();
-
-            for (int i = 0; i < indexList.Count; i++)
-            {
-                examsInTimeslot.Add(ExamIDs[indexList[i]]);
-            }
-
-            return examsInTimeslot;
         }
     }
 }
