@@ -20,57 +20,55 @@ namespace TimetableGenerator.GA
             Chromosomes = new(pop.Chromosomes);
         }
 
-        public Population(int popSize, int maxTimeSlot, int examCount, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
+        public Population(int popSize, int maxTimeSlot, Dictionary<int, List<int>> exams, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
         {
             Chromosomes = new ();
-            //GenerateRandomInitialPopulation(popSize, maxTimeSlot, examCount);
-            GenerateHeuristicInitialPopulation(popSize, maxTimeSlot, examCount, conflictMatrix, conflictTracker);
+            GenerateRandomInitialPopulation(popSize, exams);
+            //GenerateHeuristicInitialPopulation(popSize, exams, conflictMatrix, conflictTracker);
             
         }
 
         //Methods
         //Creates the initial population
-        private void GenerateRandomInitialPopulation(int populationSize, int maxTimeSlot, int examCount)
+        private void GenerateRandomInitialPopulation(int populationSize, Dictionary<int, List<int>> exams)
         {
             //Creates population equal to populationSize
             for(int i = 0; i < populationSize; i++)
             {
-                Chromosome newChromosome = new (maxTimeSlot, examCount);
+                Chromosome newChromosome = new (exams);
 
-                if (!CheckPermutationExists(newChromosome))
-                {
+                if (CheckPermutationExists(Chromosomes, newChromosome) == null)
                     Chromosomes.Add(newChromosome);//Adds new chromsome to population if permutation does not already exist
-                    continue;
-                }
-
-                --i;//Retry making chromosome            
+                else
+                    --i;//Retry making chromosome            
             }
         }
 
-        private void GenerateHeuristicInitialPopulation(int popSize, int maxTimeslot, int examCount, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
+        private void GenerateHeuristicInitialPopulation(int popSize, Dictionary<int, List<int>> exams, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
         {
             for(int i = 0; i < popSize; i++)
             {
-                Chromosome ch = new(maxTimeslot, examCount, conflictMatrix, conflictTracker);
+                Chromosome ch = new(exams, conflictMatrix, conflictTracker);
 
-                if (!CheckPermutationExists(ch))
-                {
+                if (CheckPermutationExists(Chromosomes, ch) == null)
                     Chromosomes.Add(ch);//Adds new chromsome to population if permutation does not already exist
-                    continue;
-                }
-
-                --i;
+                else
+                    --i;
             }
         }
 
-        private bool CheckPermutationExists(Chromosome chromosome)//Checks if new permutation already exists
+        public Chromosome CheckPermutationExists(List<Chromosome> chromosomeList, Chromosome chromosome)//Checks if new permutation already exists
         {
-            bool result = false;
-            Chromosomes.ForEach(ch =>
+            Chromosome result = null;
+            chromosomeList.ForEach(ch =>
             {
-                if (ch.ExamIDs.SequenceEqual(chromosome.ExamIDs))
-                    result = true;
-
+                if (chromosomeList.IndexOf(ch) != chromosomeList.IndexOf(chromosome) || !chromosomeList.Contains(chromosome))
+                    if (!ch.ExamIDs.SequenceEqual(chromosome.ExamIDs)
+                        || !ch.Timeslots.SequenceEqual(chromosome.Timeslots)
+                        || !ch.ReserveTimeslots.SequenceEqual(chromosome.ReserveTimeslots))
+                        result = null;
+                    else
+                        result = new(ch);
             });
 
             return result;

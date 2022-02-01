@@ -31,38 +31,38 @@ namespace TimetableGenerator.GA
             Timetable = ch.Timetable;
         }
 
-        public Chromosome(int maxTimeslot, int examCount)
+        public Chromosome(Dictionary<int, List<int>> exams)
         {
             ExamIDs = new();
             Timeslots = new();
             ReserveTimeslots = new();
             Timetable = new();
 
-            GenerateChromosome(examCount);
-            GenerateTimeslot(Timeslots, maxTimeslot);
-            GenerateTimeslot(ReserveTimeslots, maxTimeslot);
+            GenerateChromosome(exams.Count);
+            GenerateTimeslot(Timeslots);
+            GenerateTimeslot(ReserveTimeslots);
         }
 
-        public Chromosome(int maxTimeslot, int examCount, int[,] conflictMatrix,  Dictionary<int, int> conflictTracker)
+        public Chromosome(Dictionary<int, List<int>> exams, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
         {
             ExamIDs = new();
-            Timeslots = new(new int[conflictTracker.Count]);
-            ReserveTimeslots = new();
+            Timeslots = new();
+            ReserveTimeslots = new(new int[exams.Count]);
             Timetable = new();
 
             conflictTracker = conflictTracker.OrderBy(x => x.Value).Reverse().ToDictionary(x => x.Key, x => x.Value);
-            GenerateChromosome(examCount);
-            GenerateHeuristicTimeslot(Timeslots, maxTimeslot, conflictMatrix, conflictTracker);
-            int x = Timeslots.Max();
-            GenerateTimeslot(ReserveTimeslots, maxTimeslot);
+            exams = exams.OrderBy(x => x.Value.Count).Reverse().ToDictionary(x => x.Key, x => x.Value);
+            GenerateChromosome(exams.Count);
+            GenerateHeuristicTimeslot(ReserveTimeslots, conflictMatrix, exams.Keys.ToList());
+            GenerateTimeslot(Timeslots);
+            //GenerateHeuristicTimeslot(ReserveTimeslots, conflictMatrix, exams.Keys.ToList());
         }
-
-        //Methods
-        private void GenerateTimeslot(List<int> timeslots, int maxTimeslot)
+            //Methods
+        private void GenerateTimeslot(List<int> timeslots)
         {
             while (timeslots.Count < ExamIDs.Count)
             {
-                int timeslot = Settings.rand.Next(1, maxTimeslot + 1);
+                int timeslot = Settings.rand.Next(1, Settings.maxTimeslot + 1);
                 timeslots.Add(timeslot);
             }
         }
@@ -93,27 +93,28 @@ namespace TimetableGenerator.GA
             }
         }
 
-        private void GenerateHeuristicTimeslot(List<int> timeslots, int maxTimeslot, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
+        private void GenerateHeuristicTimeslot(List<int> timeslots, int[,] conflictMatrix, List<int> conflictTracker)
         {
             //Go through each exam in the conflict list (already in order of most conflicts)
             foreach (var exam in conflictTracker)
             {
                 //Get the index of the exam in the Exam Id list
-                int index = ExamIDs.IndexOf(exam.Key);
+                int index = ExamIDs.IndexOf(exam);
                 //Set timeslot value to 1 (first timeslot available)
                 int currentTimeslot = 1;
+                //if the exam is the first
+                if (timeslots.All(x => x == 0))
+                {
+                    //set timeslot value to the item at the index of the timeslot list
+                    timeslots[index] = currentTimeslot;
+                    continue;
+                }
                 //While the value == 0 (null)
                 while (timeslots[index] == 0 && currentTimeslot <= Settings.maxTimeslot)
                 {
                     //Set flag to false, assume there is no conflict
                     bool conflicts = false;
-                    //if the exam is the first
-                    if (timeslots.All(x => x == 0))
-                    {
-                        //set timeslot value to the item at the index of the timeslot list
-                        timeslots[index] = currentTimeslot;
-                        break;
-                    }
+
                     //find all exam scheduled at the current timeslot
                     List<int> scheduledExams = new();
                     FindScheduledExams(scheduledExams, timeslots, currentTimeslot);
@@ -121,25 +122,28 @@ namespace TimetableGenerator.GA
                     if (scheduledExams.Count > 0)
                         //go through each scheduled exam
                         foreach (var scheduled in scheduledExams)
+                        {
                             //Check if there any conflicts between the current exam and the scheduled exam
-                            if (conflictMatrix[exam.Key - 1, scheduled - 1] != 0)
+                            if (conflictMatrix[exam - 1, scheduled - 1] != 0)
                             {
                                 //if there is conflict increase timeslot
                                 currentTimeslot++;
                                 //set flag to true
                                 conflicts = true;
                                 //continue the search
-                                continue;
+                                break;
                             }
+                        }
                     //if there is no conflict found set timeslot
                     if (!conflicts)
                         timeslots[index] = currentTimeslot;
                 }
                 //If the exam can't be assigned a timeslot, randomly give it one
-                if (currentTimeslot > Settings.maxTimeslot)
+                if (currentTimeslot > Settings.maxTimeslot && timeslots[index] == 0)
                     timeslots[index] = Settings.rand.Next(1, Settings.maxTimeslot + 1);
             }
         }
+
 
         private void FindScheduledExams(List<int> scheduled, List<int> timeslots, int currentTimeslot)
         {

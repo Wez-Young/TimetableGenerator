@@ -9,10 +9,10 @@ namespace TimetableGenerator.GA.Genetic_Operators
     public class MutationOperators
     {
 
-        public static Chromosome SwapMutate(Chromosome child)
+        public static void SwapMutate(Chromosome child)
         {
             if (Settings.rand.NextDouble() > Settings.mutationProbability)
-                return child;
+                return;
             //Swap mutate the permutation of the exam IDs
             int index1 = Settings.rand.Next(child.ExamIDs.Count);
             int index2 = Settings.rand.Next(index1, child.ExamIDs.Count);
@@ -23,22 +23,21 @@ namespace TimetableGenerator.GA.Genetic_Operators
             child.ExamIDs[index2] = tempGene;
 
             CheckDupeGene(child);
-            return child;
         }
 
-        public static Chromosome ReverseMutate(Chromosome child)
+        public static void ReverseMutate(Chromosome child)
         {
             child.ExamIDs.Reverse();
             //child.Timeslots.Reverse();
             //child.ReserveTimeslots.Reverse();
 
             CheckDupeGene(child);
-
-            return child;
         }
 
-        public static Chromosome ScrambleMutate(Chromosome child)
+        public static void ScrambleMutate(Chromosome child)
         {
+            if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                return;
             //get two points
             int index1 = Settings.rand.Next(child.ExamIDs.Count);
             int index2 = Settings.rand.Next(index1, child.ExamIDs.Count);
@@ -54,8 +53,13 @@ namespace TimetableGenerator.GA.Genetic_Operators
                 child.ExamIDs[i] = subset[i - index1];
 
             CheckDupeGene(child);
+        }
 
-            return child;
+        public static void StealMutate(Chromosome child)
+        {
+            if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                return;
+
         }
 
         public static void CheckDupeGene(Chromosome child)
