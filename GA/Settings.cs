@@ -8,7 +8,10 @@ namespace TimetableGenerator.GA
         public static int maxTimeslot = 24;
 
         public static int elitismPercentage = 10;
-        public static double mutationProbability = 0.3;
+        public static double mutationProbability = 0.5;
         public static double crossoverProbability = 0.8;
+
+        public static string filename = "ear-f-83";
+        public static int testNum = 10;
     }
 }

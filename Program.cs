@@ -13,93 +13,95 @@ namespace TimetableGenerator
     class Program
     {
         private static Dictionary<int, List<int>> examStudentList = new();
-
         public static int count = 0;
-
 
         static void Main()
         {
-        Stopwatch timer = new();
-        int popSize = 50, gen = 0;
-            examStudentList = new(new SortedDictionary<int, List<int>>(ReadFile("ear-f-83.stu")));
-            Dictionary<int, int> conflictTracker = new();
-
-            int[,] conflictMatrix = new int[examStudentList.Count, examStudentList.Count];
-            CreateConflictMatrix(conflictMatrix, conflictTracker);
-
-            Population population = new(popSize, Settings.maxTimeslot, examStudentList, conflictMatrix, conflictTracker);
-            population.Chromosomes.ForEach(ch => ch.Fitness = CheckFitness(conflictMatrix, ch));
-
-            bool run = true;
-            timer.Start();
-            while (run)
+            int popSize = 50, gen = 0;
+            examStudentList = new(new SortedDictionary<int, List<int>>(ReadFile()));
+            for (int test = 0; test < Settings.testNum; test++)
             {
-                gen++;
-                Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().Fitness} No. unplaced exams: {Math.Round(population.BestFitness().Fitness * examStudentList.Count)}");
-                //Console.WriteLine($" Generation: {gen} Worst Fitness: {population.WorstFitness().Fitness} No. unplaced exams: {Math.Round(population.WorstFitness().Fitness * examStudentList.Count)}");
+                Stopwatch timer = new();
+                Dictionary<int, int> conflictTracker = new();
+                int[,] conflictMatrix = new int[examStudentList.Count, examStudentList.Count];
+                CreateConflictMatrix(conflictMatrix, conflictTracker);
 
-                Population elites = new();
-                //Get the x top chromsomes based on the fitness
-                decimal percentage = popSize / 100m;
-                elites.Chromosomes = population.Chromosomes.OrderBy(x => x.Fitness).Take(Convert.ToInt32(percentage * Settings.elitismPercentage)).ToList();
-                //Remove the 'elite' chromosomes from the population to avoid duplication
-                population.Chromosomes.RemoveAll(x => elites.Chromosomes.Contains(x));
-                //Select another x num of chromosomes to go into the next generation
-                RouletteWheelSelection(population, "selection");
-                //Add the elites back into the population
-                population.Chromosomes.AddRange(elites.Chromosomes);
+                Population population = new(popSize, Settings.maxTimeslot, examStudentList, conflictMatrix, conflictTracker);
+                population.Chromosomes.ForEach(ch => ch.Fitness = CheckFitness(conflictMatrix, ch));
 
-                List<Chromosome> children = new();
-                //Create the rest of the population through children of the surviving population
-                for (int i = population.Chromosomes.Count; population.Chromosomes.Count + children.Count < popSize; i++)
+                bool run = true;
+                timer.Start();
+                while (run)
                 {
-                    //Create child based on two randomly selected chromosomes using a Crossover method
-                    CrossoverOperators.PartiallyMappedCrossover(children, RouletteWheelSelection(population, "parent"), RouletteWheelSelection(population, "parent"));
-                    //CrossoverOperators.OrderedCrossover(children, new Chromosome(RouletteWheelSelection(population, "parent")), new Chromosome(RouletteWheelSelection(population, "parent")));
+                    gen++;
+                    Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().Fitness} No. unplaced exams: {Math.Round(population.BestFitness().Fitness * examStudentList.Count)}\n Time Elapsed: {timer.Elapsed}");
+                    //Console.WriteLine($" Generation: {gen} Worst Fitness: {population.WorstFitness().Fitness} No. unplaced exams: {Math.Round(population.WorstFitness().Fitness * examStudentList.Count)}");
 
-                    //CrossoverOperators.PartiallyMappedCrossover(children, SelectParent(population), SelectParent(population));
-                    //CrossoverOperators.OrderedCrossover(children, SelectParent(population), SelectParent(population));
-
-                    children.ForEach(child => MutationOperators.SwapMutate(child));
-                    //children.ForEach(child => MutationOperators.ScrambleMutate(child));
-                    children.ForEach(child => {child.Fitness = CheckFitness(conflictMatrix, child); });
-
-                    List<Chromosome> removeDupesList = new();
-                    children.ForEach(ch =>
-                    {
-                        var check = population.CheckPermutationExists(population.Chromosomes, ch);
-                        if (check == null)
-                        {
-                            check = population.CheckPermutationExists(children, ch);
-                            if (check != null)
-                                removeDupesList.Add(ch);
-                        }
-                        else
-                            removeDupesList.Add(ch);
-                    });
-                    if (removeDupesList.Count > 0)
-                        children.RemoveAll(child => removeDupesList.Contains(child));
-                }
-                //Add newly created children to the population
-                population.Chromosomes.AddRange(children);
-
-                while (population.Chromosomes.Count > popSize)
+                    Population elites = new();
+                    //Get the x top chromsomes based on the fitness
+                    decimal percentage = popSize / 100m;
+                    elites.Chromosomes = population.Chromosomes.OrderBy(x => x.Fitness).Take(Convert.ToInt32(percentage * Settings.elitismPercentage)).ToList();
+                    //Remove the 'elite' chromosomes from the population to avoid duplication
+                    population.Chromosomes.RemoveAll(x => elites.Chromosomes.Contains(x));
+                    //Select another x num of chromosomes to go into the next generation
                     RouletteWheelSelection(population, "selection");
-       
-                if (population.BestFitness().Fitness == 0 || timer.Elapsed.Minutes == 10)
-                {
-                    run = false;
-                    timer.Stop();
-                }
-            }
+                    //Add the elites back into the population
+                    population.Chromosomes.AddRange(elites.Chromosomes);
 
-            PrintInfo(population, gen, conflictMatrix, timer);
+                    List<Chromosome> children = new();
+                    //Create the rest of the population through children of the surviving population
+                    for (int i = population.Chromosomes.Count; population.Chromosomes.Count + children.Count < popSize; i++)
+                    {
+                        //Create child based on two randomly selected chromosomes using a Crossover method
+                        CrossoverOperators.PartiallyMappedCrossover(children, RouletteWheelSelection(population, "parent"), RouletteWheelSelection(population, "parent"));
+                        //CrossoverOperators.OrderedCrossover(children, new Chromosome(RouletteWheelSelection(population, "parent")), new Chromosome(RouletteWheelSelection(population, "parent")));
+
+                        //CrossoverOperators.PartiallyMappedCrossover(children, TournamentSelection(population), TournamentSelection(population));
+                        //CrossoverOperators.OrderedCrossover(children, TournamentSelection(population), TournamentSelection(population));
+
+                        children.ForEach(child => MutationOperators.BlindMutate(child));
+                        //children.ForEach(child => MutationOperators.ScrambleMutate(child));
+                        children.ForEach(child => { child.Fitness = CheckFitness(conflictMatrix, child); });
+
+                        List<Chromosome> removeDupesList = new();
+                        children.ForEach(ch =>
+                        {
+                            var check = population.CheckPermutationExists(population.Chromosomes, ch);
+                            if (check == null)
+                            {
+                                check = population.CheckPermutationExists(children, ch);
+                                if (check != null)
+                                    removeDupesList.Add(ch);
+                            }
+                            else
+                                removeDupesList.Add(ch);
+                        });
+                        if (removeDupesList.Count > 0)
+                            children.RemoveAll(child => removeDupesList.Contains(child));
+                    }
+                    //Add newly created children to the population
+                    population.Chromosomes.AddRange(children);
+
+                    while (population.Chromosomes.Count > popSize)
+                        RouletteWheelSelection(population, "selection");
+                        //RandomSelection(population);
+
+                    if (population.BestFitness().Fitness == 0 || timer.Elapsed.Minutes == 10)
+                    {
+                        run = false;
+                        timer.Stop();
+                    }
+                }
+                population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
+                PrintInfo(population, gen, conflictMatrix, timer);
+                WriteSolution(population.BestFitness(), timer, gen, test);
+            }
         }
         //Reads in and sorts the data from a file  
-        private static Dictionary<int, List<int>> ReadFile(string filename)
+        private static Dictionary<int, List<int>> ReadFile()
         {
             //Splits each line of the file into seperate items
-            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{filename}"));
+            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{Settings.filename + ".stu"}"));
             Dictionary<int, List<int>> exams = new();
             int studentID = 0;
 
@@ -174,10 +176,28 @@ namespace TimetableGenerator
             count = 0;
             double fitness = 0;
             Dictionary<int, List<int>> timetable = new();
-            int index = -1;
+            //Decodes the chromosome into a timetable
+            CreateTimetable(timetable, conflictMatrix, ch);
+            //Calculate fitness based onthe number of unplaced exams divided by the total number of exams e.g., 33/190 = fitness
+            fitness = Math.Round((double)(ch.ExamIDs.Count - timetable.Values.Sum(list => list.Count)) / ch.ExamIDs.Count, 4);
+            return fitness;
+        }
+
+        private static void CreateTimetable(Dictionary<int, List<int>> timetable, int[,] conflictMatrix, Chromosome ch)
+        {
+
             //Populate timetable with timeslot number (ID) and an empty assigned exam list
             for (int i = 1; i <= Settings.maxTimeslot; i++)
                 timetable.Add(i, new());
+
+            AssignMainTimeslot(timetable, conflictMatrix, ch);
+
+            ch.Timetable = new(timetable);
+        }
+        //Attempt to assign exam to its main timeslot
+        private static void AssignMainTimeslot(Dictionary<int, List<int>> timetable, int[,] conflictMatrix, Chromosome ch)
+        {
+            int index = -1;
             //Go through the permutation of exams
             foreach (var exam in ch.ExamIDs)
             {
@@ -216,23 +236,6 @@ namespace TimetableGenerator
                             timetable[currentTimeslot] = new(assignedExams);
                             break;
 
-                        /*case 1://Check if the conflicting exam or the current one is larger based on the number of students
-                            KeyValuePair<int, int> biggestExam = new(exam, examStudentList[exam].Count);
-
-                            if (biggestExam.Value < examStudentList[conflicts[0]].Count)
-                                //Attempt to assign the current exam to its backup timeslot
-                                AssignBackup(timetable, conflictMatrix, ch, biggestExam.Key);
-                            else
-                            {
-                                //Remove the assigned exam - smaller exam
-                                assignedExams.Remove(conflicts[0]);
-                                assignedExams.Add(exam);
-                                timetable[currentTimeslot] = new(assignedExams);
-                                //Attempt to assign the assigned exam to its reserved timeslot
-                                AssignBackup(timetable, conflictMatrix, ch, conflicts[0]);
-                            }
-                            break;*/
-
                         default:
                             //If the number of conflicting exams is greater than one, directly attempt to assign exam to back up timeslot 
                             AssignBackup(timetable, conflictMatrix, ch, exam, visitedTimeslots);
@@ -240,13 +243,7 @@ namespace TimetableGenerator
                     }
                 }
             }
-
-            ch.Timetable = new(timetable);
-            //Calculate fitness based onthe number of unplaced exams divided by the total number of exams e.g., 33/190 = fitness
-            fitness = Math.Round((double)(ch.ExamIDs.Count - timetable.Values.Sum(list => list.Count)) / ch.ExamIDs.Count, 4);
-            return fitness;
         }
-
         //Attempt to assign exam to its reserve timeslot
         private static void AssignBackup(Dictionary<int, List<int>> timetable, int[,] conflictMatrix, Chromosome ch, int examID, List<int> visitedTimeslots)
         {
@@ -278,9 +275,7 @@ namespace TimetableGenerator
                             return;
 
                         //Do nothing if there is no conflicts
-                        if (conflictMatrix[examID - 1, assigned - 1] == 0)
-                            continue;
-                        else
+                        if (conflictMatrix[examID - 1, assigned - 1] != 0)
                             conflicts.Add(assigned);
                     }
 
@@ -307,17 +302,18 @@ namespace TimetableGenerator
                             TryAllTimeslots(timetable, conflictMatrix, ch, examID, visitedTimeslots);
                             break;
                     }
-                }              
+                }
             }
             else
                 TryAllTimeslots(timetable, conflictMatrix, ch, examID, visitedTimeslots);
         }
 
+        //Tries to place exam in all remaining timeslots
         private static void TryAllTimeslots(Dictionary<int, List<int>> timetable, int[,] conflictMatrix, Chromosome ch, int examID, List<int> visitedTimeslots)
         {
             int currentTimeslot = 1;
 
-            while(currentTimeslot <= Settings.maxTimeslot)
+            while (currentTimeslot <= Settings.maxTimeslot)
             {
                 while (visitedTimeslots.Count < Settings.maxTimeslot && visitedTimeslots.Contains(currentTimeslot))
                     currentTimeslot++;
@@ -335,9 +331,7 @@ namespace TimetableGenerator
                         return;
 
                     //Do nothing if there is no conflicts
-                    if (conflictMatrix[examID - 1, assigned - 1] == 0)
-                        continue;
-                    else
+                    if (conflictMatrix[examID - 1, assigned - 1] != 0)
                         conflicts.Add(assigned);
                 }
 
@@ -351,6 +345,7 @@ namespace TimetableGenerator
                     currentTimeslot++;
             }
         }
+
         private static int CheckConflicts(int[,] conflictMatrix, Chromosome solution)
         {
             int conflicts = 0;
@@ -379,7 +374,6 @@ namespace TimetableGenerator
             Console.WriteLine($"Best Fitness: {population.BestFitness().Fitness} No. unplaced exams: {Math.Round(population.BestFitness().Fitness * examStudentList.Count)}");
             Console.WriteLine($"No. of Conflicts: {CheckConflicts(conflictMatrix, population.BestFitness())}");
 
-            population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
             population.BestFitness().ExamIDs.ForEach(id =>
             {
                 bool result = false;
@@ -396,11 +390,37 @@ namespace TimetableGenerator
             });
         }
 
+        private static void WriteSolution(Chromosome solution, Stopwatch timer, int gen, int testNum)
+        {
+            var directory = Directory.CreateDirectory(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{Settings.filename}");
+            if (directory != null)
+            {
+                string filename = $"{Settings.filename}_test{testNum}.sol";
+                using StreamWriter w = new StreamWriter($"{directory}/{filename}");
+
+
+                w.WriteLine($"Fitness Score: {solution.Fitness} Generation: {gen} Total Time: {timer.Elapsed}");
+
+                foreach (var examID in solution.ExamIDs)
+                {
+                    bool result = false;
+                    foreach (var item in solution.Timetable)
+                        if (item.Value.Contains(examID))
+                        {
+                            w.WriteLine($"{examID}  {item.Key}");
+                            result = true;
+                        }
+                    if (!result)
+                        w.WriteLine("0");
+                }
+            }
+        }
+
         //---Survival Selection Methods---
 
         //basic survial selection method using randomness
         //Select a parent for reproducing
-        private static Chromosome SelectParent(Population pop)
+        private static Chromosome TournamentSelection(Population pop)
         {
             //Create a copy of a random chromosome within the population
             Chromosome winner = new(pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)]);

@@ -9,7 +9,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
     public class MutationOperators
     {
 
-        public static void SwapMutate(Chromosome child)
+        public static void BlindMutate(Chromosome child)
         {
             if (Settings.rand.NextDouble() > Settings.mutationProbability)
                 return;
@@ -59,7 +59,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
         {
             if (Settings.rand.NextDouble() > Settings.mutationProbability)
                 return;
-
+ 
         }
 
         public static void CheckDupeGene(Chromosome child)
