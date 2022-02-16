@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
     <Folder Include="Data\Toronto\" />
+    <Folder Include="GUI\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +42,9 @@
     <Resource Include="Data\Toronto\yor-f-83.stu" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="GUI\" />
+  </ItemGroup>
   <ItemGroup>
     <None Update="Data\Toronto\car-f-92.crs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

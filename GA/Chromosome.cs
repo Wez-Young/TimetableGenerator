@@ -11,7 +11,8 @@ namespace TimetableGenerator.GA
         public List<int> ExamIDs { get; set; }
         public List<int> Timeslots { get; set; }
         public List<int> ReserveTimeslots { get; set; }
-        public double Fitness { get; set; }
+        public double HardConstraintFitness { get; set; }
+        public double SoftConstraintFitness { get; set; }
         public Dictionary<int, List<int>> Timetable { get; set; }
 
         //Constructors
@@ -27,7 +28,8 @@ namespace TimetableGenerator.GA
             ExamIDs = new(ch.ExamIDs);
             Timeslots = new(ch.Timeslots);
             ReserveTimeslots = new(ch.ReserveTimeslots);
-            Fitness = ch.Fitness;
+            HardConstraintFitness = ch.HardConstraintFitness;
+            SoftConstraintFitness = ch.SoftConstraintFitness;
             Timetable = ch.Timetable;
         }
 
@@ -143,7 +145,6 @@ namespace TimetableGenerator.GA
                     timeslots[index] = Settings.rand.Next(1, Settings.maxTimeslot + 1);
             }
         }
-
 
         private void FindScheduledExams(List<int> scheduled, List<int> timeslots, int currentTimeslot)
         {

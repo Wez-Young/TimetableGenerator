@@ -76,12 +76,12 @@ namespace TimetableGenerator.GA
 
         public Chromosome WorstFitness()
         {
-            return Chromosomes.OrderByDescending(ch => ch.Fitness).First();
+            return Chromosomes.OrderByDescending(ch => ch.HardConstraintFitness).First();
         }
 
         public Chromosome BestFitness()
         {
-            return Chromosomes.OrderBy(ch => ch.Fitness).First();
+            return Chromosomes.OrderBy(ch => ch.HardConstraintFitness).First();
         }
     }
 }
