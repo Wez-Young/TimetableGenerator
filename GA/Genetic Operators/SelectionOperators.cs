@@ -1,14 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TimetableGenerator.GA.Genetic_Operators
 {
     public class SelectionOperators
     {
-        //---Survival Selection Methods---
+        public static void ElitismSelection(Population population, int popSize)
+        {
+            Population elites = new();
+            //Get the x top chromsomes based on the fitness
+            decimal percentage = popSize / 100m;
+            elites.Chromosomes = population.Chromosomes.OrderBy(x => x.HardConstraintFitness).Take(Convert.ToInt32(percentage * Settings.elitismPercentage)).ToList();
+            //Remove the 'elite' chromosomes from the population to avoid duplication
+            population.Chromosomes.RemoveAll(x => elites.Chromosomes.Contains(x));
+            //Select another x num of chromosomes to go into the next generation
+            SelectionOperators.RouletteWheelSelection(population, "selection");
+            //Add the elites back into the population
+            population.Chromosomes.AddRange(elites.Chromosomes);
+        }
 
-        //basic survial selection method using randomness
-        //Select a parent for reproducing
         public static Chromosome TournamentSelection(Population pop)
         {
             //Create a copy of a random chromosome within the population

@@ -13,6 +13,7 @@ namespace TimetableGenerator.GA
         public List<int> ReserveTimeslots { get; set; }
         public double HardConstraintFitness { get; set; }
         public double SoftConstraintFitness { get; set; }
+        public double OriginalSoftConstraintFitness { get; set; }
         public Dictionary<int, List<int>> Timetable { get; set; }
 
         //Constructors
@@ -30,6 +31,7 @@ namespace TimetableGenerator.GA
             ReserveTimeslots = new(ch.ReserveTimeslots);
             HardConstraintFitness = ch.HardConstraintFitness;
             SoftConstraintFitness = ch.SoftConstraintFitness;
+            OriginalSoftConstraintFitness = ch.OriginalSoftConstraintFitness;
             Timetable = ch.Timetable;
         }
 
@@ -43,6 +45,14 @@ namespace TimetableGenerator.GA
             GenerateChromosome(exams.Count);
             GenerateTimeslot(Timeslots);
             GenerateTimeslot(ReserveTimeslots);
+        }
+        //Constructor to create already made solutions
+        public Chromosome(List<int> timeslots)
+        {
+            ExamIDs = new();
+            Timeslots = new(timeslots);
+            ReserveTimeslots = new();
+            Timetable = new();
         }
 
         public Chromosome(Dictionary<int, List<int>> exams, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)

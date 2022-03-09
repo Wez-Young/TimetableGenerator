@@ -69,31 +69,58 @@ namespace TimetableGenerator.GA
             });
         }
 
-        public static void WriteSolution(Chromosome solution, Stopwatch timer, int gen, int testNum)
+        public static void WriteFiles(Chromosome solution, Stopwatch timer, int gen, int testNum, int count)
         {
             var directory = Directory.CreateDirectory(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{Settings.filename}");
             if (directory != null)
             {
-                string filename = $"{Settings.filename}_test{testNum}.sol";
-                using StreamWriter w = new StreamWriter($"{directory}/{filename}");
-
-
-                w.WriteLine($"Fitness Score: {solution.HardConstraintFitness} Generation: {gen} Total Time: {timer.Elapsed}");
-
-                foreach (var examID in solution.ExamIDs)
-                {
-                    bool result = false;
-                    foreach (var item in solution.Timetable)
-                        if (item.Value.Contains(examID))
-                        {
-                            w.WriteLine($"{examID}  {item.Key}");
-                            result = true;
-                        }
-                    if (!result)
-                        w.WriteLine("0");
-                }
+                WriteData(directory, testNum, solution, gen, timer, count);
+                WriteSolution(directory, testNum, solution);
             }
         }
 
+        private static void WriteData(DirectoryInfo directory, int testNum, Chromosome solution, int gen, Stopwatch timer, int fitnessCount)
+        {
+            StreamWriter w;
+            string filename = $"{Settings.filename}.csv";
+            if (!File.Exists($"{directory}/{filename}"))
+            {
+                w = new StreamWriter($"{directory}/{filename}");
+                w.WriteLine($"{Settings.testName},Original Fitness Score:,Fitness After Hill Climber:,Generation:,Total Time:,No. Fitness Functions Executed:");
+            }
+            else
+                w = new StreamWriter($"{directory}/{filename}", true);
+
+            w.WriteLine($"{testNum},{solution.OriginalSoftConstraintFitness},{solution.SoftConstraintFitness},{gen},{timer.Elapsed},{fitnessCount}");
+
+            w.Flush();
+            w.Close();
+        }
+        private static void WriteSolution(DirectoryInfo directory, int testNum, Chromosome solution)
+        {
+            StreamWriter w;
+            string filename = $"{Settings.filename}_solutions.csv";
+
+            if (!File.Exists($"{directory}/{filename}"))
+                w = new StreamWriter($"{directory}/{filename}");
+            else
+                w = new StreamWriter($"{directory}/{filename}", true);
+            w.WriteLine($"{Settings.testName}_{testNum}");
+            w.WriteLine($"Exam ID,Timeslot");
+            foreach (var examID in solution.ExamIDs)
+            {
+                bool result = false;
+                foreach (var item in solution.Timetable)
+                    if (item.Value.Contains(examID))
+                    {
+                        w.WriteLine($"{examID}, {item.Key}");
+                        result = true;
+                    }
+                if (!result)
+                    w.WriteLine("0");
+            }
+            w.Flush();
+            w.Close();
+        }
     }
 }
