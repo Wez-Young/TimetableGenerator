@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace TimetableGenerator.GA
 {
     public class Settings
@@ -10,6 +12,8 @@ namespace TimetableGenerator.GA
         public const int elitismPercentage = 10;
         public const double mutationProbability = 0.5;
         public const double crossoverProbability = 0.75;
+
+        public static Dictionary<int, List<int>> examStudentList = new();
 
         public const string filename = "yor-f-83";
         public const int testNum = 10;

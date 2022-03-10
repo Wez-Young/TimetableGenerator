@@ -69,17 +69,17 @@ namespace TimetableGenerator.GA
             });
         }
 
-        public static void WriteFiles(Chromosome solution, Stopwatch timer, int gen, int testNum, int count)
+        public static void WriteFiles(Chromosome solution, Stopwatch timer, int gen, int count)
         {
             var directory = Directory.CreateDirectory(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{Settings.filename}");
             if (directory != null)
             {
-                WriteData(directory, testNum, solution, gen, timer, count);
-                WriteSolution(directory, testNum, solution);
+                WriteData(directory, solution, gen, timer, count);
+                WriteSolution(directory, solution);
             }
         }
 
-        private static void WriteData(DirectoryInfo directory, int testNum, Chromosome solution, int gen, Stopwatch timer, int fitnessCount)
+        private static void WriteData(DirectoryInfo directory, Chromosome solution, int gen, Stopwatch timer, int fitnessCount)
         {
             StreamWriter w;
             string filename = $"{Settings.filename}.csv";
@@ -91,12 +91,12 @@ namespace TimetableGenerator.GA
             else
                 w = new StreamWriter($"{directory}/{filename}", true);
 
-            w.WriteLine($"{testNum},{solution.OriginalSoftConstraintFitness},{solution.SoftConstraintFitness},{gen},{timer.Elapsed},{fitnessCount}");
+            w.WriteLine($"{solution.OriginalSoftConstraintFitness},{solution.SoftConstraintFitness},{gen},{timer.Elapsed},{fitnessCount}");
 
             w.Flush();
             w.Close();
         }
-        private static void WriteSolution(DirectoryInfo directory, int testNum, Chromosome solution)
+        private static void WriteSolution(DirectoryInfo directory, Chromosome solution)
         {
             StreamWriter w;
             string filename = $"{Settings.filename}_solutions.csv";
@@ -105,7 +105,7 @@ namespace TimetableGenerator.GA
                 w = new StreamWriter($"{directory}/{filename}");
             else
                 w = new StreamWriter($"{directory}/{filename}", true);
-            w.WriteLine($"{Settings.testName}_{testNum}");
+            w.WriteLine($"{Settings.testName}");
             w.WriteLine($"Exam ID,Timeslot");
             foreach (var examID in solution.ExamIDs)
             {
