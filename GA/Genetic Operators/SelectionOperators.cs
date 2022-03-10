@@ -6,6 +6,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
 {
     public class SelectionOperators
     {
+
         public static void ElitismSelection(Population population, int popSize)
         {
             Population elites = new();
@@ -122,7 +123,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
         private static Chromosome SelectIndividual(Population pop, List<double> cumalativeFitnesses)
         {
             //Generate a random fitness value
-            double rndFitness = Settings.rand.NextDouble() * cumalativeFitnesses[cumalativeFitnesses.Count - 1];
+            double rndFitness = Settings.rand.NextDouble() * cumalativeFitnesses[^1];
             //Find the index of the culmative value that is equal to the random fitness value
             int index = cumalativeFitnesses.BinarySearch(rndFitness);
 

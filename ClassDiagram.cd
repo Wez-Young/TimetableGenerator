@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="TimetableGenerator.GA.Chromosome">
+    <Position X="7" Y="3.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAUBAAAAACAAAAAAgAAAACAAAAQCAEAAAEAAAAIAA=</HashCode>
+      <FileName>GA\Chromosome.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimetableGenerator.GA.IO">
+    <Position X="10.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAEAAAAAAAAAgAAAEAAAAAAAABAA=</HashCode>
+      <FileName>GA\IO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimetableGenerator.GA.Population">
+    <Position X="6.5" Y="8" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAEEAAAAAAAQAIAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>GA\Population.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimetableGenerator.GA.Settings">
+    <Position X="3.25" Y="7.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAYBQAIAAAAgAAAAAAAAAAAAAAAQAAIAAAAAAAAQ=</HashCode>
+      <FileName>GA\Settings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimetableGenerator.GA.Genetic_Operators.CrossoverOperators">
+    <Position X="6.75" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAACACAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GA\Genetic Operators\CrossoverOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimetableGenerator.GA.Genetic_Operators.MutationOperators">
+    <Position X="3.75" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACIABAAAAAAAAAAAAAAEAAAEAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GA\Genetic Operators\MutationOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimetableGenerator.GA.Genetic_Operators.SelectionOperators">
+    <Position X="10.75" Y="4.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABIAAAAAAAAAAAABAAAAAAAAIA=</HashCode>
+      <FileName>GA\Genetic Operators\SelectionOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -70,13 +70,6 @@ namespace TimetableGenerator.GA.Genetic_Operators
             CheckDupeGene(child);
         }
 
-        public static void StealMutate(Chromosome child)
-        {
-            if (Settings.rand.NextDouble() > Settings.mutationProbability)
-                return;
- 
-        }
-
         public static void CheckDupeGene(Chromosome child)
         {
             if (child.ExamIDs.Count - child.ExamIDs.Distinct().Count() > 0)

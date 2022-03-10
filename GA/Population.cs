@@ -20,7 +20,7 @@ namespace TimetableGenerator.GA
             Chromosomes = new(pop.Chromosomes);
         }
 
-        public Population(int popSize, int maxTimeSlot, Dictionary<int, List<int>> exams, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
+        public Population(int popSize, Dictionary<int, List<int>> exams, int[,] conflictMatrix, Dictionary<int, int> conflictTracker)
         {
             Chromosomes = new ();
             GenerateRandomInitialPopulation(popSize, exams);
