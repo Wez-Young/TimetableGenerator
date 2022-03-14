@@ -27,11 +27,9 @@ namespace TimetableGenerator.GA.Genetic_Operators
 
         public static void BlindMutateTimeslots(Chromosome child)
         {
-            if (Settings.rand.NextDouble() > Settings.mutationProbability)
-                return;
             //Swap mutate the permutation of the exam IDs
-            int index1 = Settings.rand.Next(child.ExamIDs.Count);
-            int index2 = Settings.rand.Next(index1, child.ExamIDs.Count);
+            int index1 = Settings.rand.Next(child.Timeslots.Count);
+            int index2 = Settings.rand.Next(index1, child.Timeslots.Count);
 
             int tempGene = child.Timeslots[index1];
 
@@ -42,9 +40,15 @@ namespace TimetableGenerator.GA.Genetic_Operators
         }
         public static void ReverseMutate(Chromosome child)
         {
+            if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                return;
             child.ExamIDs.Reverse();
-            //child.Timeslots.Reverse();
-            //child.ReserveTimeslots.Reverse();
+            if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                return;
+            child.Timeslots.Reverse();
+            if (Settings.rand.NextDouble() > Settings.mutationProbability)
+                return;
+            child.ReserveTimeslots.Reverse();
 
             CheckDupeGene(child);
         }

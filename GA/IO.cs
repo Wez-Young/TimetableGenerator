@@ -8,11 +8,18 @@ namespace TimetableGenerator.GA
     public class IO
     {
         //Reads in and sorts the data from a file  
-        public static Dictionary<int, List<int>> ReadFile()
+        public static Dictionary<int, List<int>> ReadProblemFile()
         {
             //Splits each line of the file into seperate items
-            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{Settings.filename + ".stu"}"));
             Dictionary<int, List<int>> exams = new();
+            GetStudents(exams, Settings.filename);
+            return exams;
+        }
+
+        public static void GetStudents(Dictionary<int, List<int>> exams, string filename)
+        {
+            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{filename + ".stu"}"));
+
             int studentID = 0;
 
             //Goes through each item within the list
@@ -44,8 +51,19 @@ namespace TimetableGenerator.GA
                     exams[examKey] = studentList;
                 }
             }
+        }
+        public static Chromosome ReadSolutionFile(string filename)
+        {
+            Chromosome solution = new();
+            List<string> solutionTimeslots = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{filename}/{filename}_{Settings.testName}.csv"));
 
-            return exams;
+            if(solutionTimeslots[0].Contains(","))
+                solutionTimeslots[0] = solutionTimeslots[0].Replace(',', ' ');
+
+            solutionTimeslots = new(solutionTimeslots[0].Split(' '));
+            solutionTimeslots.ForEach(x => { if (!x.Equals("")) solution.Timeslots.Add(Convert.ToInt32(x)); });
+
+            return solution;
         }
 
         public static void PrintInfo(Population population, int gen, Stopwatch timer, Dictionary<int, List<int>> examStudentList)
@@ -69,55 +87,42 @@ namespace TimetableGenerator.GA
             });
         }
 
-        public static void WriteFiles(Chromosome solution, Stopwatch timer, int gen, int count)
-        {
-            var directory = Directory.CreateDirectory(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{Settings.filename}");
-            if (directory != null)
-            {
-                WriteData(directory, solution, gen, timer, count);
-                WriteSolution(directory, solution);
-            }
-        }
-
-        private static void WriteData(DirectoryInfo directory, Chromosome solution, int gen, Stopwatch timer, int fitnessCount)
+        public static void WriteData(DirectoryInfo directory, Chromosome solution, Stopwatch timer)
         {
             StreamWriter w;
             string filename = $"{Settings.filename}.csv";
             if (!File.Exists($"{directory}/{filename}"))
             {
                 w = new StreamWriter($"{directory}/{filename}");
-                w.WriteLine($"{Settings.testName},Original Fitness Score:,Fitness After Hill Climber:,Generation:,Total Time:,No. Fitness Functions Executed:");
+                w.WriteLine($"{Settings.testName},Original Fitness Score:,Fitness After Hill Climber:,Total Time:");
             }
             else
                 w = new StreamWriter($"{directory}/{filename}", true);
 
-            w.WriteLine($"{solution.OriginalSoftConstraintFitness},{solution.SoftConstraintFitness},{gen},{timer.Elapsed},{fitnessCount}");
+            w.WriteLine($",{solution.OriginalSoftConstraintFitness},{solution.SoftConstraintFitness},{timer.Elapsed}");
 
             w.Flush();
             w.Close();
         }
-        private static void WriteSolution(DirectoryInfo directory, Chromosome solution)
+
+        public static void WriteSolution(DirectoryInfo directory, Chromosome solution)
         {
             StreamWriter w;
-            string filename = $"{Settings.filename}_solutions.csv";
+            string filename = $"{Settings.filename}_{Settings.testName}.csv";
 
-            if (!File.Exists($"{directory}/{filename}"))
-                w = new StreamWriter($"{directory}/{filename}");
-            else
-                w = new StreamWriter($"{directory}/{filename}", true);
-            w.WriteLine($"{Settings.testName}");
-            w.WriteLine($"Exam ID,Timeslot");
+            w = new StreamWriter($"{directory}/{filename}");
+
             foreach (var examID in solution.ExamIDs)
             {
                 bool result = false;
                 foreach (var item in solution.Timetable)
                     if (item.Value.Contains(examID))
                     {
-                        w.WriteLine($"{examID}, {item.Key}");
+                        w.Write($"{item.Key} ");
                         result = true;
                     }
                 if (!result)
-                    w.WriteLine("0");
+                    w.Write("0 ");
             }
             w.Flush();
             w.Close();

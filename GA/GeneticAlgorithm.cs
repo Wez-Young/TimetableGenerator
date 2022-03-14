@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using TimetableGenerator.GA.Genetic_Operators;
 
 namespace TimetableGenerator.GA
 {
-    class GeneticAlgorithm
+    public class GeneticAlgorithm
     {
        public static void StartGA()
         {
@@ -27,7 +28,7 @@ namespace TimetableGenerator.GA
             while (run)
             {
                 gen++;
-                Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().HardConstraintFitness} No. unplaced exams: {Math.Round(population.BestFitness().HardConstraintFitness * Settings.examStudentList.Count)}\n Time Elapsed: {timer.Elapsed}\tNo. calculated fitness: {count}");
+                Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().HardConstraintFitness} No. unplaced exams: {Math.Round(population.BestFitness().HardConstraintFitness * Settings.examStudentList.Count)}\n Time Elapsed: {timer.Elapsed}");
                 //Console.WriteLine($" Generation: {gen} Worst Fitness: {population.WorstFitness().Fitness} No. unplaced exams: {Math.Round(population.WorstFitness().Fitness * examStudentList.Count)}");
 
                 SelectionOperators.ElitismSelection(population, popSize);
@@ -44,6 +45,7 @@ namespace TimetableGenerator.GA
                     //CrossoverOperators.OrderedCrossover(children, TournamentSelection(population), TournamentSelection(population));
 
                     children.ForEach(child => MutationOperators.BlindMutate(child));
+                    //children.ForEach(child => MutationOperators.ReverseMutate(child));
                     //children.ForEach(child => MutationOperators.ScrambleMutate(child));
                     children.ForEach(child => { child.HardConstraintFitness = CheckHardConstraintFitness(conflictMatrix, child); });
 
@@ -67,10 +69,11 @@ namespace TimetableGenerator.GA
                 population.Chromosomes.AddRange(children);
 
                 while (population.Chromosomes.Count > popSize)
-                    SelectionOperators.RouletteWheelSelection(population, "selection");
+                    SelectionOperators.TournamentSelection(population);
+                    //SelectionOperators.RouletteWheelSelection(population, "selection");
                 //RandomSelection(population);
 
-                if (population.BestFitness().HardConstraintFitness == 0)
+                if (population.BestFitness().HardConstraintFitness == 0 )//|| timer.Elapsed.Minutes == 5)
                 {
                     run = false;
                     timer.Stop();
@@ -78,7 +81,7 @@ namespace TimetableGenerator.GA
             }
             population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
             IO.PrintInfo(population, gen, timer, Settings.examStudentList);
-            IO.WriteFiles(population.BestFitness(), timer, gen, count);
+            IO.WriteSolution(Settings.directory, population.BestFitness());
         }
 
         //Initialises the exam conflicts matrix

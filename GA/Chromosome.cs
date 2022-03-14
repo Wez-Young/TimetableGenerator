@@ -17,7 +17,16 @@ namespace TimetableGenerator.GA
         public Dictionary<int, List<int>> Timetable { get; set; }
 
         //Constructors
-        public Chromosome() { }
+        public Chromosome() 
+        {
+            ExamIDs = new();
+            Timeslots = new();
+            ReserveTimeslots = new();
+            HardConstraintFitness = 0;
+            SoftConstraintFitness = 0;
+            OriginalSoftConstraintFitness = 0;
+            Timetable = new();
+        }
 
         public Chromosome (int size)
         {

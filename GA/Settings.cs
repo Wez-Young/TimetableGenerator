@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace TimetableGenerator.GA
 {
@@ -7,7 +8,7 @@ namespace TimetableGenerator.GA
     {
         public static Random rand = new ();
         public const int tournamentSize = 2;
-        public const int maxTimeslot = 21;
+        public const int maxTimeslot = 23;
 
         public const int elitismPercentage = 10;
         public const double mutationProbability = 0.5;
@@ -15,8 +16,9 @@ namespace TimetableGenerator.GA
 
         public static Dictionary<int, List<int>> examStudentList = new();
 
-        public const string filename = "yor-f-83";
+        public const string filename = "tre-s-92";
         public const int testNum = 10;
-        public const string testName = "PBR";
+        public const string testName = "PBS";
+        public static DirectoryInfo directory = Directory.CreateDirectory(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{filename}");
     }
 }

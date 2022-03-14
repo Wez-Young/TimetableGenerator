@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,16 +11,24 @@ namespace TimetableGenerator
 {
     class HillClimber
     {
-        public static void StartHillClimber(Population population)
+        public static void StartHillClimber(Chromosome solution)
         {
-            CheckSoftConstraintFitness(population.BestFitness());
-            Chromosome solutionCopy = new(population.BestFitness());
-            MutationOperators.BlindMutateTimeslots(solutionCopy);
-            CheckSoftConstraintFitness(solutionCopy);
-            if (solutionCopy.SoftConstraintFitness < population.BestFitness().SoftConstraintFitness)
-                population.Chromosomes[population.Chromosomes.IndexOf(population.BestFitness())] = new(solutionCopy);
+            Stopwatch timer = new();
+            CheckSoftConstraintFitness(solution);
+            timer.Start();
+            while (timer.Elapsed.Minutes < 5)
+            {
+                Chromosome solutionCopy = new(solution);
+                MutationOperators.BlindMutateTimeslots(solutionCopy);
+                CheckSoftConstraintFitness(solutionCopy);
+                if (solutionCopy.SoftConstraintFitness < solution.SoftConstraintFitness)
+                    solution = new(solutionCopy);
 
-            Console.WriteLine($"Best Fitness: {population.BestFitness().SoftConstraintFitness}");
+                Console.WriteLine($"Best Fitness: {solution.SoftConstraintFitness}");
+            }
+            IO.WriteData(Settings.directory, solution, timer);
+            timer.Stop();
+
         }
 
         private static void CheckSoftConstraintFitness(Chromosome solution)
