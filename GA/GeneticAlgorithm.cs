@@ -30,12 +30,12 @@ namespace TimetableGenerator.GA
                 gen++;
                 Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().HardConstraintFitness} No. unplaced exams: {Math.Round(population.BestFitness().HardConstraintFitness * Settings.examStudentList.Count)}\n Time Elapsed: {timer.Elapsed}");
                 //Console.WriteLine($" Generation: {gen} Worst Fitness: {population.WorstFitness().Fitness} No. unplaced exams: {Math.Round(population.WorstFitness().Fitness * examStudentList.Count)}");
-
+                CheckForDuplicates(population, population.Chromosomes);
                 SelectionOperators.ElitismSelection(population, popSize);
 
                 List<Chromosome> children = new();
                 //Create the rest of the population through children of the surviving population
-                for (int i = population.Chromosomes.Count; population.Chromosomes.Count + children.Count < popSize; i++)
+                for (int i = population.Chromosomes.Count; population.Chromosomes.Count + children.Count <= popSize; i++)
                 {
                     //Create child based on two randomly selected chromosomes using a Crossover method
                     CrossoverOperators.PartiallyMappedCrossover(children, SelectionOperators.RouletteWheelSelection(population, "parent"), SelectionOperators.RouletteWheelSelection(population, "parent"));
@@ -49,28 +49,14 @@ namespace TimetableGenerator.GA
                     //children.ForEach(child => MutationOperators.ScrambleMutate(child));
                     children.ForEach(child => { child.HardConstraintFitness = CheckHardConstraintFitness(conflictMatrix, child); });
 
-                    List<Chromosome> removeDupesList = new();
-                    children.ForEach(ch =>
-                    {
-                        var check = population.CheckPermutationExists(population.Chromosomes, ch);
-                        if (check == null)
-                        {
-                            check = population.CheckPermutationExists(children, ch);
-                            if (check != null)
-                                removeDupesList.Add(ch);
-                        }
-                        else
-                            removeDupesList.Add(ch);
-                    });
-                    if (removeDupesList.Count > 0)
-                        children.RemoveAll(child => removeDupesList.Contains(child));
+                    CheckForDuplicates(population, children);
                 }
                 //Add newly created children to the population
                 population.Chromosomes.AddRange(children);
 
                 while (population.Chromosomes.Count > popSize)
-                    SelectionOperators.TournamentSelection(population);
-                    //SelectionOperators.RouletteWheelSelection(population, "selection");
+                    //SelectionOperators.TournamentSelection(population);
+                    SelectionOperators.RouletteWheelSelection(population, "selection");
                 //RandomSelection(population);
 
                 if (population.BestFitness().HardConstraintFitness == 0 )//|| timer.Elapsed.Minutes == 5)
@@ -81,7 +67,7 @@ namespace TimetableGenerator.GA
             }
             population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
             IO.PrintInfo(population, gen, timer, Settings.examStudentList);
-            IO.WriteSolution(Settings.directory, population.BestFitness());
+            IO.WriteSolution(Settings.directory, population.BestFitness(), timer);
         }
 
         //Initialises the exam conflicts matrix
@@ -105,6 +91,22 @@ namespace TimetableGenerator.GA
                 }
             }
         }
+
+        private static void CheckForDuplicates(Population population, List<Chromosome> chromosomeList)
+        {
+            List<Chromosome> removeDupesList = new();
+            chromosomeList.ForEach(ch =>
+            {
+
+                var check = population.CheckPermutationExists(chromosomeList, ch);
+                if (check != null)
+                    removeDupesList.Add(ch);
+
+            });
+            if (removeDupesList.Count > 0)
+                chromosomeList.RemoveAll(child => removeDupesList.Contains(child));
+        }
+
         //Check the number of conflicts between two exams
         private static int FindConflicts(KeyValuePair<int, List<int>> firstExam, KeyValuePair<int, List<int>> nextExam)
         {

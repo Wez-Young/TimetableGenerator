@@ -16,7 +16,7 @@ namespace TimetableGenerator
             Stopwatch timer = new();
             CheckSoftConstraintFitness(solution);
             timer.Start();
-            while (timer.Elapsed.Minutes < 5)
+            while (timer.Elapsed.Minutes < 10)
             {
                 Chromosome solutionCopy = new(solution);
                 MutationOperators.BlindMutateTimeslots(solutionCopy);
@@ -24,7 +24,7 @@ namespace TimetableGenerator
                 if (solutionCopy.SoftConstraintFitness < solution.SoftConstraintFitness)
                     solution = new(solutionCopy);
 
-                Console.WriteLine($"Best Fitness: {solution.SoftConstraintFitness}");
+                Console.WriteLine($"Best Fitness: {solution.SoftConstraintFitness} Time: {timer.Elapsed}");
             }
             IO.WriteData(Settings.directory, solution, timer);
             timer.Stop();
@@ -39,8 +39,6 @@ namespace TimetableGenerator
                 students.UnionWith(item.Value);
             for (int i = 0; i < solution.Timeslots.Count; i++)
             {
-                //change to int j = chromosome[i] + 1 for proper fitness
-                //j is timeslots
                 for (int j = solution.Timeslots[i] + 1; j <= solution.Timeslots[i] + 5; j++)
                 {
                     if (j > Settings.maxTimeslot)

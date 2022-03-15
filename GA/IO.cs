@@ -12,13 +12,13 @@ namespace TimetableGenerator.GA
         {
             //Splits each line of the file into seperate items
             Dictionary<int, List<int>> exams = new();
-            GetStudents(exams, Settings.filename);
+            GetStudents(exams);
             return exams;
         }
 
-        public static void GetStudents(Dictionary<int, List<int>> exams, string filename)
+        public static void GetStudents(Dictionary<int, List<int>> exams)
         {
-            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{filename + ".stu"}"));
+            List<string> fileData = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Data/Toronto/{Settings.filename + ".stu"}"));
 
             int studentID = 0;
 
@@ -52,10 +52,10 @@ namespace TimetableGenerator.GA
                 }
             }
         }
-        public static Chromosome ReadSolutionFile(string filename)
+        public static Chromosome ReadSolutionFile()
         {
             Chromosome solution = new();
-            List<string> solutionTimeslots = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{filename}/{filename}_{Settings.testName}.csv"));
+            List<string> solutionTimeslots = new(File.ReadAllLines(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/{Settings.filename}/{Settings.filename}_{Settings.testName}.csv"));
 
             if(solutionTimeslots[0].Contains(","))
                 solutionTimeslots[0] = solutionTimeslots[0].Replace(',', ' ');
@@ -105,13 +105,13 @@ namespace TimetableGenerator.GA
             w.Close();
         }
 
-        public static void WriteSolution(DirectoryInfo directory, Chromosome solution)
+        public static void WriteSolution(DirectoryInfo directory, Chromosome solution, Stopwatch timer)
         {
             StreamWriter w;
             string filename = $"{Settings.filename}_{Settings.testName}.csv";
 
             w = new StreamWriter($"{directory}/{filename}");
-
+            w.WriteLine($"Overall time: {timer.Elapsed.TotalMinutes}");
             foreach (var examID in solution.ExamIDs)
             {
                 bool result = false;
