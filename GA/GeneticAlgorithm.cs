@@ -13,6 +13,83 @@ namespace TimetableGenerator.GA
     {
        public static void StartGA()
         {
+<<<<<<< HEAD
+            List<int> popSizes = new() { 50, 100, 150 };
+            List<double> mutationRates = new() { 0.25, 0.5, 0.75 };
+            List<double> crossoverRates = new() { 0.25, 0.5, 0.75 };
+            int testCount = 0;
+
+            foreach (var popSize in popSizes)
+            {
+                foreach (var cRate in crossoverRates)
+                {
+                    Settings.crossoverProbability = cRate;
+                    foreach (var mRate in mutationRates)
+                    {
+                        Settings.directory = Directory.CreateDirectory(@$"{AppDomain.CurrentDomain.BaseDirectory}/Solutions/P{popSize}/M{mRate}_C{cRate}");
+                        Settings.mutationProbability = mRate;
+                        testCount++;
+                        int gen = 0;
+                        Stopwatch timer = new();
+                        Dictionary<int, int> conflictTracker = new();
+
+                        int[,] conflictMatrix = new int[Settings.examStudentList.Count, Settings.examStudentList.Count];
+                        CreateConflictMatrix(conflictMatrix, conflictTracker);
+
+                        Population population = new(popSize, Settings.examStudentList, conflictMatrix, conflictTracker);
+                        population.Chromosomes.ForEach(ch => { ch.HardConstraintFitness = CheckHardConstraintFitness(conflictMatrix, ch); Settings.fitnessEvalCount += 1; });
+
+                        bool run = true;
+                        timer.Start();
+                        while (run)
+                        {
+                            gen++;
+                            Console.WriteLine($" Generation: {gen} Best Fitness: {population.BestFitness().HardConstraintFitness} No. unplaced exams: {Math.Round(population.BestFitness().HardConstraintFitness * Settings.examStudentList.Count)}\n Time Elapsed: {timer.Elapsed}");
+                            //Console.WriteLine($" Generation: {gen} Worst Fitness: {population.WorstFitness().Fitness} No. unplaced exams: {Math.Round(population.WorstFitness().Fitness * examStudentList.Count)}");
+                            CheckForDuplicates(population, population.Chromosomes);
+
+                            List<Chromosome> children = new();
+                            //Create the rest of the population through children of the surviving population
+                            for (int i = population.Chromosomes.Count; population.Chromosomes.Count + children.Count <= popSize; i++)
+                            {
+                                //Create child based on two randomly selected chromosomes using a Crossover method
+                                CrossoverOperators.PartiallyMappedCrossover(children, SelectionOperators.RouletteWheelSelection(population, "parent"), SelectionOperators.RouletteWheelSelection(population, "parent")); Settings.testName.Concat("P");
+                                //CrossoverOperators.OrderedCrossover(children, new Chromosome(RouletteWheelSelection(population, "parent")), new Chromosome(RouletteWheelSelection(population, "parent"))); Settings.testName.Concat("O");
+
+                                //CrossoverOperators.PartiallyMappedCrossover(children, SelectionOperators.TournamentSelection(population, "parent"), SelectionOperators.TournamentSelection(population, "parent")); Settings.testName.Concat("P");
+                                //CrossoverOperators.OrderedCrossover(children, TournamentSelection(population), TournamentSelection(population)); Settings.testName.Concat("O");
+
+                                children.ForEach(child => MutationOperators.BlindMutate(child)); Settings.testName.Concat("B");
+                                //children.ForEach(child => MutationOperators.ReverseMutate(child));Settings.testName.Concat("R");
+                                //children.ForEach(child => MutationOperators.ScrambleMutate(child)); Settings.testName.Concat("S");
+                                children.ForEach(child => { child.HardConstraintFitness = CheckHardConstraintFitness(conflictMatrix, child); ; Settings.fitnessEvalCount += 1; });
+
+                                CheckForDuplicates(population, children);
+                            }
+                            //Add newly created children to the population
+                            population.Chromosomes.AddRange(children);
+
+                            while (population.Chromosomes.Count > popSize)
+                            {
+                                //SelectionOperators.TournamentSelection(population, "selection");Settings.testName.Concat("T");
+                                SelectionOperators.RouletteWheelSelection(population, "selection"); Settings.testName.Concat("R");
+                                //RandomSelection(population);
+                            }
+
+                            if (population.BestFitness().HardConstraintFitness == 0 || timer.Elapsed.TotalMinutes >= Settings.maxTime)
+                            {
+                                run = false;
+                                timer.Stop();
+                            }
+                            SelectionOperators.ElitismSelection(population, popSize); Settings.testName.Concat("E");
+                        }
+                        population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
+                        IO.PrintInfo(population, gen, timer, Settings.examStudentList, Settings.fitnessEvalCount);
+                        IO.WriteSolution(Settings.directory, population.BestFitness(), timer, gen, Settings.fitnessEvalCount);
+                    }
+                }
+            }
+=======
             int popSize = 50, count = 0, gen = 0;
             Stopwatch timer = new();
             Dictionary<int, int> conflictTracker = new();
@@ -68,6 +145,7 @@ namespace TimetableGenerator.GA
             population.BestFitness().ExamIDs = population.BestFitness().ExamIDs.OrderBy(x => x).ToList();
             IO.PrintInfo(population, gen, timer, Settings.examStudentList);
             IO.WriteSolution(Settings.directory, population.BestFitness(), timer);
+>>>>>>> 51da1bb5daf3dc866d56cf3439ddaceaad36650a
         }
 
         //Initialises the exam conflicts matrix

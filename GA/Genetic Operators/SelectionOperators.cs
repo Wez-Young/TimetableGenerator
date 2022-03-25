@@ -21,6 +21,60 @@ namespace TimetableGenerator.GA.Genetic_Operators
             population.Chromosomes.AddRange(elites.Chromosomes);
         }
 
+<<<<<<< HEAD
+        public static Chromosome TournamentSelection(Population pop, string option)
+        {
+            //Create a copy of a random chromosome within the population
+            Chromosome winner = pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)];
+            switch (option)
+            {
+                case "parent":
+
+                    //Iterate until value equals touranament size
+                    for (int i = 1; i < Settings.tournamentSize; ++i)
+                    {
+                        //Create copy of chromosome from population
+                        Chromosome candidate = pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)];
+
+                        //Check that the candidate is not the same individual as the winner
+                        while (winner.Equals(candidate))
+                            candidate = pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)];
+
+                        //If the fitness value of the candidate is lower then set winner to be the candidate
+                        if (candidate.HardConstraintFitness < winner.HardConstraintFitness)
+                        {
+                            return new(candidate);
+                        }
+                    }
+
+                    return new(winner);
+
+                case "selection":
+
+                    //Iterate until value equals touranament size
+                    for (int i = 1; i < Settings.tournamentSize; ++i)
+                    {
+                        //Create copy of chromosome from population
+                        Chromosome candidate = pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)];
+
+                        //Check that the candidate is not the same individual as the winner
+                        while (winner.Equals(candidate))
+                            candidate = new(pop.Chromosomes[Settings.rand.Next(pop.Chromosomes.Count)]);
+
+                        //If the fitness value of the candidate is lower then set winner to be the candidate
+                        if (candidate.HardConstraintFitness < winner.HardConstraintFitness)
+                        {
+                            pop.Chromosomes.Remove(winner);
+                            return null;
+                        }
+
+                        pop.Chromosomes.Remove(candidate);
+                    }
+                    return null;
+            }
+
+            return null;
+=======
         public static void TournamentSelection(Population pop)
         {
             //Create a copy of a random chromosome within the population
@@ -45,6 +99,7 @@ namespace TimetableGenerator.GA.Genetic_Operators
 
                 pop.Chromosomes.Remove(candidate);
             }
+>>>>>>> 51da1bb5daf3dc866d56cf3439ddaceaad36650a
         }
 
         public static Population RandomSelection(Population pop)
