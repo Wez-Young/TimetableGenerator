@@ -41,20 +41,41 @@ namespace TimetableGenerator
         
         private static void SelectProblem()
         {
+<<<<<<< HEAD
+            Console.WriteLine("\n[1] car-f-92\n[2] tre-s-92\n[3] yor-f-83\n[4] Debug\n[0] Exit\nSelect one problem to solve:");
+=======
             Console.WriteLine("\n[1] car-f-92\n[2] tre-s-92\n[3] yor-f-83\n[0] Exit\nSelect one problem to solve:");
+>>>>>>> 51da1bb5daf3dc866d56cf3439ddaceaad36650a
             switch (Console.ReadLine())
             {
                 case "1":
                     Settings.filename = "car-f-92";
                     Settings.maxTimeslot = 32;
+<<<<<<< HEAD
+                    Settings.maxTime = 60;
+=======
+>>>>>>> 51da1bb5daf3dc866d56cf3439ddaceaad36650a
                     break;
                 case "2":
                     Settings.filename = "tre-s-92";
                     Settings.maxTimeslot = 23;
+<<<<<<< HEAD
+                    Settings.maxTime = 30;
+=======
+>>>>>>> 51da1bb5daf3dc866d56cf3439ddaceaad36650a
                     break;
                 case "3":
                     Settings.filename = "yor-f-83";
                     Settings.maxTimeslot = 21;
+<<<<<<< HEAD
+                    Settings.maxTime = 30;
+                    break;
+                case "4":
+                    Settings.filename = "ear-f-83";
+                    Settings.maxTimeslot = 24;
+                    Settings.maxTime = 1;
+=======
+>>>>>>> 51da1bb5daf3dc866d56cf3439ddaceaad36650a
                     break;
                 default:
                     break;

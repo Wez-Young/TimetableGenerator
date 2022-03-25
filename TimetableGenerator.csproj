@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Platforms>AnyCPU;x86;x64</Platforms>
+    <Platforms>AnyCPU;x64;x86</Platforms>
     <ApplicationIcon />
     <StartupObject />
   </PropertyGroup>
@@ -21,7 +21,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Data\Toronto\" />
-    <Folder Include="GUI\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,7 +53,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="GUI\" />
     <None Remove="CsvHelper" />
   </ItemGroup>
   <ItemGroup>
